@@ -1,6 +1,5 @@
 .card {
   background: var(--card-bg);
-  border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
   backdrop-filter: blur(var(--glass-blur-md));
@@ -8,19 +7,16 @@
   padding: var(--card-padding);
   transition:
     background var(--duration-normal) var(--ease-default),
-    border-color var(--duration-normal) var(--ease-default),
     box-shadow var(--duration-normal) var(--ease-default);
 }
 
 .hover:hover {
   background: var(--glass-bg-hover);
-  border-color: var(--glass-border-strong);
   box-shadow: var(--glass-shadow-md);
 }
 
 .active {
   background: var(--glass-bg-active);
-  border-color: var(--brand-primary);
   box-shadow: var(--glass-shadow-glow);
 }
 

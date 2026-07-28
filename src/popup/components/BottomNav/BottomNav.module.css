@@ -3,11 +3,10 @@
   align-items: center;
   justify-content: space-around;
   padding: var(--space-1) var(--space-4);
-  background: var(--glass-bg);
+  background: transparent;
   border-top: 1px solid var(--glass-border-subtle);
   backdrop-filter: blur(var(--glass-blur-lg));
   -webkit-backdrop-filter: blur(var(--glass-blur-lg));
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
 }
 
 .item {
