@@ -53,8 +53,8 @@ export default function ProgressRing({ progress = 0, size = 160, strokeWidth = 6
         />
       </svg>
       <div className={styles.content}>
-        {children}
         <span className={styles.percentage}>{Math.round(progress)}%</span>
+        {children}
       </div>
     </div>
   );
