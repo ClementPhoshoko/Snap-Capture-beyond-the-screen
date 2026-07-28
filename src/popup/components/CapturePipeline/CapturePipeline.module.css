@@ -38,6 +38,15 @@
   border-radius: var(--radius-full);
   color: var(--text-secondary);
   flex-shrink: 0;
+  transition: color var(--duration-normal) var(--ease-default);
+}
+
+.iconBoxCompleted {
+  color: var(--status-success);
+}
+
+.iconBoxActive {
+  color: var(--brand-primary);
 }
 
 .text {

@@ -107,18 +107,20 @@ export default function CaptureProgressScreen({ onClose, onBack }) {
         </button>
 
         <div className={styles.headerCenter}>
-          <div className={styles.headerBrand}>
+          <div className={styles.logo}>
             <img
               src={new URL("../../assets/Snap Logo.png", import.meta.url).href}
               alt="AkovoLabs Snap"
-              className={styles.headerLogo}
+              className={styles.logoImg}
               draggable={false}
             />
-            <span className={styles.headerTitle}>AkovoLabs Snap</span>
           </div>
-          <span className={styles.headerSubtitle}>
-            Capture beyond the screen.
-          </span>
+          <div className={styles.headerText}>
+            <span className={styles.headerTitle}>AkovoLabs Snap</span>
+            <span className={styles.headerSubtitle}>
+              Capture beyond the screen.
+            </span>
+          </div>
         </div>
 
         <button
@@ -136,7 +138,7 @@ export default function CaptureProgressScreen({ onClose, onBack }) {
           Please don't close this window or switch tabs.
         </span>
         <div className={styles.progressSection}>
-          <ProgressRing progress={progress} size={120} strokeWidth={4}>
+          <ProgressRing progress={progress} size={120} strokeWidth={6}>
             <div className={styles.progressMeta}>
               <span className={styles.progressLabel}>Captured</span>
               <span className={styles.progressCount}>6 of 16 sections</span>

@@ -26,7 +26,6 @@
   width: 24px;
   height: 24px;
   border-radius: var(--radius-full);
-  background: var(--glass-bg);
   color: var(--brand-primary);
 }
 
@@ -45,7 +44,7 @@
 }
 
 .value {
-  font-size: 8px;
+  font-size: 10px;
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   line-height: var(--line-height-tight);

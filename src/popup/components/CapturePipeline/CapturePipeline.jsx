@@ -33,7 +33,7 @@ function CapturePipelineItem({ item, index }) {
     >
       <div className={styles.left}>
         {Icon && (
-          <div className={styles.iconBox}>
+          <div className={`${styles.iconBox} ${item.status === "completed" ? styles.iconBoxCompleted : ""} ${isActive ? styles.iconBoxActive : ""}`}>
             <Icon size={14} />
           </div>
         )}

@@ -15,9 +15,6 @@
   stroke: var(--glass-bg);
 }
 
-.progress {
-  filter: drop-shadow(0 0 8px rgba(124, 92, 252, 0.35));
-}
 
 .content {
   position: relative;
