@@ -16,7 +16,6 @@ import {
 import ProgressRing from "../../components/ProgressRing";
 import CapturePipeline from "../../components/CapturePipeline";
 import CaptureStats from "../../components/CaptureStats";
-import GlassButton from "../../components/GlassButton";
 import styles from "./CaptureProgress.module.css";
 
 const PIPELINE_ITEMS = [
@@ -157,18 +156,6 @@ export default function CaptureProgressScreen({ onClose, onBack }) {
 
       {/* Stats */}
       <CaptureStats stats={STATS} />
-
-      {/* Footer */}
-      <div className={styles.footer}>
-        <GlassButton
-          variant="cancel"
-          icon={X}
-          onClick={onClose}
-          className={styles.cancelBtn}
-        >
-          Cancel Capture
-        </GlassButton>
-      </div>
     </motion.div>
   );
 }
