@@ -1,0 +1,68 @@
+.indicator {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  transition: all var(--duration-normal) var(--ease-default);
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Completed */
+.completed {
+  background: var(--status-success-bg);
+  color: var(--status-success);
+}
+
+.completed .iconWrapper {
+  color: var(--status-success);
+}
+
+/* Active */
+.active {
+  background: var(--status-info-bg);
+  color: var(--brand-primary);
+}
+
+.active .iconWrapper {
+  color: var(--brand-primary);
+}
+
+.glow {
+  position: absolute;
+  inset: -4px;
+  border-radius: var(--radius-full);
+  background: rgba(124, 92, 252, 0.12);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.4); opacity: 0; }
+}
+
+/* Pending */
+.pending {
+  background: var(--glass-bg);
+  color: var(--text-tertiary);
+}
+
+.pending .iconWrapper {
+  color: var(--text-tertiary);
+}
+
+/* Error */
+.error {
+  background: var(--status-error-bg);
+  color: var(--status-error);
+}
+
+.error .iconWrapper {
+  color: var(--status-error);
+}

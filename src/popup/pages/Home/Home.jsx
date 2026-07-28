@@ -25,7 +25,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export default function Home() {
+export default function Home({ onStartCapture }) {
   const [captureMode, setCaptureMode] = useState("fullpage");
   const [settings, setSettings] = useState({
     format: "png",
@@ -34,7 +34,7 @@ export default function Home() {
   });
 
   const handleCapture = () => {
-    console.log("Capture:", { captureMode, settings });
+    onStartCapture?.();
   };
 
   return (
