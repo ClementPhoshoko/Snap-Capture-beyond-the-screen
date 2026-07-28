@@ -89,7 +89,7 @@
 .subtitle {
   position: absolute;
   left: 0;
-  top: 50%;
+  top: 40%;
   transform: translateY(-50%);
   font-size: var(--font-size-xs);
   color: var(--text-tertiary);

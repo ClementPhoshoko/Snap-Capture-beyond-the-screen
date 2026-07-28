@@ -137,7 +137,7 @@ export default function CaptureProgressScreen({ onClose, onBack }) {
           Please don't close this window or switch tabs.
         </span>
         <div className={styles.progressSection}>
-          <ProgressRing progress={progress} size={96} strokeWidth={4}>
+          <ProgressRing progress={progress} size={120} strokeWidth={4}>
             <div className={styles.progressMeta}>
               <span className={styles.progressLabel}>Captured</span>
               <span className={styles.progressCount}>6 of 16 sections</span>
