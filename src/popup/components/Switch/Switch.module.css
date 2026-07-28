@@ -33,7 +33,6 @@
 }
 
 .on {
-  background: var(--brand-primary);
   border-color: var(--brand-primary);
 }
 
