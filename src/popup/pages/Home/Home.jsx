@@ -5,7 +5,6 @@ import CurrentTabCard from "../../components/CurrentTabCard";
 import CaptureMode from "../../components/CaptureMode";
 import QuickSettings from "../../components/QuickSettings";
 import CaptureButton from "../../components/CaptureButton";
-import BottomNav from "../../components/BottomNav";
 import styles from "./Home.module.css";
 
 const pageVariants = {
@@ -28,7 +27,6 @@ const itemVariants = {
 
 export default function Home() {
   const [captureMode, setCaptureMode] = useState("fullpage");
-  const [nav, setNav] = useState("home");
   const [settings, setSettings] = useState({
     format: "png",
     location: "downloads",
@@ -68,8 +66,6 @@ export default function Home() {
       <motion.div className={styles.content} variants={itemVariants}>
         <CaptureButton onClick={handleCapture} />
       </motion.div>
-
-      <BottomNav active={nav} onChange={setNav} />
     </motion.div>
   );
 }

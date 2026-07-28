@@ -1,11 +1,11 @@
 .btn {
   width: 100%;
-  height: var(--btn-height-lg);
+  height: var(--btn-height-sm);
   border-radius: var(--btn-radius);
   background: var(--gradient-accent);
   border: none;
   color: #ffffff;
-  font-size: var(--btn-font-size);
+  font-size: var(--font-size-xs);
   font-weight: var(--btn-font-weight);
   font-family: inherit;
   display: flex;

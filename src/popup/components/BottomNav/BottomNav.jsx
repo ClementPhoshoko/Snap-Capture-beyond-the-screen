@@ -27,7 +27,7 @@ export default function BottomNav({ active = "home", onChange }) {
             aria-selected={isActive}
             aria-label={item.label}
           >
-            <Icon size={18} className={styles.icon} />
+            <Icon size={14} className={styles.icon} />
             <span className={styles.label}>{item.label}</span>
           </motion.button>
         );

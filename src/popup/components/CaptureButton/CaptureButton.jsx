@@ -12,7 +12,7 @@ export default function CaptureButton({ onClick, disabled, label = "Start Captur
       whileTap={!disabled ? { scale: 0.97, y: 0 } : undefined}
       transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
     >
-      <Camera size={18} className={styles.icon} />
+      <Camera size={15} className={styles.icon} />
       <span className={styles.label}>{label}</span>
     </motion.button>
   );

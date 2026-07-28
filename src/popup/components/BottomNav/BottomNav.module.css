@@ -2,23 +2,20 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: var(--space-2) 0;
+  padding: var(--space-1) var(--space-4);
   background: var(--glass-bg);
   border-top: 1px solid var(--glass-border-subtle);
   backdrop-filter: blur(var(--glass-blur-lg));
   -webkit-backdrop-filter: blur(var(--glass-blur-lg));
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
-  margin: 0 calc(var(--popup-padding) * -1);
-  padding-left: var(--space-4);
-  padding-right: var(--space-4);
 }
 
 .item {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 2px;
-  padding: var(--space-1) var(--space-3);
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
   background: none;
   border: none;
   color: var(--text-tertiary);
@@ -37,7 +34,7 @@
 }
 
 .item:hover .icon {
-  transform: translateY(-1px);
+  transform: scale(1.1);
 }
 
 .active {

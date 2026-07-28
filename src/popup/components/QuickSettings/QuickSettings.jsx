@@ -26,7 +26,7 @@ export default function QuickSettings({ settings, onChange }) {
         <div className={styles.row}>
           <div className={styles.rowLeft}>
             <div className={styles.rowIcon}>
-              <Image size={14} />
+              <Image size={13} />
             </div>
             <span className={styles.rowLabel}>Image Format</span>
           </div>
@@ -43,7 +43,7 @@ export default function QuickSettings({ settings, onChange }) {
         <div className={styles.row}>
           <div className={styles.rowLeft}>
             <div className={styles.rowIcon}>
-              <Download size={14} />
+              <Download size={13} />
             </div>
             <span className={styles.rowLabel}>Save Location</span>
           </div>
@@ -60,7 +60,7 @@ export default function QuickSettings({ settings, onChange }) {
         <div className={styles.row}>
           <div className={styles.rowLeft}>
             <div className={styles.rowIcon}>
-              <Zap size={14} />
+              <Zap size={13} />
             </div>
             <span className={styles.rowLabel}>Auto Download</span>
           </div>
