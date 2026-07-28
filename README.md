@@ -79,12 +79,12 @@ Designed for developers, designers, QA engineers, technical writers, marketers, 
 | Technology | Purpose |
 |------------|----------|
 | React | Popup UI |
-| TypeScript | Type safety |
+| JavaScript (ESM) | Logic |
 | Vite | Build tool |
+| Tailwind CSS | Styling |
 | Chrome Extension Manifest V3 | Extension platform |
 | Chrome APIs | Browser integration |
 | Canvas API | Image stitching |
-| CSS | Styling |
 
 ---
 
@@ -101,41 +101,39 @@ akovolabs-snap/
 ├── src/
 │   │
 │   ├── popup/
-│   │   ├── pages/
 │   │   ├── components/
 │   │   ├── hooks/
-│   │   └── App.tsx
+│   │   └── main.jsx
 │   │
 │   ├── background/
-│   │   └── service-worker.ts
+│   │   └── service-worker.js
 │   │
 │   ├── content/
-│   │   ├── capture.ts
-│   │   ├── scroll.ts
-│   │   ├── analyzer.ts
-│   │   └── helpers.ts
+│   │   ├── capture.js
+│   │   ├── scroll.js
+│   │   ├── analyzer.js
+│   │   └── helpers.js
 │   │
 │   ├── stitching/
-│   │   ├── canvas.ts
-│   │   ├── crop.ts
-│   │   └── merge.ts
+│   │   ├── canvas.js
+│   │   ├── crop.js
+│   │   └── merge.js
 │   │
 │   ├── services/
-│   │   ├── download.ts
-│   │   ├── storage.ts
-│   │   └── clipboard.ts
-│   │
-│   ├── types/
+│   │   ├── download.js
+│   │   ├── storage.js
+│   │   └── clipboard.js
 │   │
 │   ├── utils/
 │   │
 │   ├── styles/
 │   │
-│   └── main.tsx
+│   └── main.jsx
 │
 ├── package.json
-├── tsconfig.json
-├── vite.config.ts
+├── vite.config.js
+├── tailwind.config.js
+├── postcss.config.js
 └── README.md
 ```
 
