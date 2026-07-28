@@ -131,17 +131,17 @@ export default function CaptureProgressScreen({ onClose, onBack }) {
         </button>
       </div>
 
-      {/* Title */}
-      <div className={styles.titleSection}>
-        <h1 className={styles.title}>Capturing Full Page</h1>
-        <p className={styles.subtitle}>
-          Please don't close this window or switch tabs.
-        </p>
-      </div>
-
       {/* Progress Ring */}
       <div className={styles.progressSection}>
-        <ProgressRing progress={progress} size={96} strokeWidth={4} />
+        <ProgressRing
+          progress={progress}
+          size={96}
+          strokeWidth={4}
+          label="Capturing Full Page"
+        />
+        <span className={styles.hint}>
+          Please don't close this window or switch tabs.
+        </span>
         <div className={styles.progressMeta}>
           <span className={styles.progressLabel}>Captured</span>
           <span className={styles.progressCount}>6 of 16 sections</span>

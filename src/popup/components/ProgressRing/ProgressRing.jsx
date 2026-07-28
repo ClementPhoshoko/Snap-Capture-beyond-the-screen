@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useReducedMotion } from "framer-motion";
 import styles from "./ProgressRing.module.css";
 
-export default function ProgressRing({ progress = 0, size = 160, strokeWidth = 6 }) {
+export default function ProgressRing({ progress = 0, size = 160, strokeWidth = 6, label }) {
   const reducedMotion = useReducedMotion();
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -53,6 +53,7 @@ export default function ProgressRing({ progress = 0, size = 160, strokeWidth = 6
         />
       </svg>
       <div className={styles.content}>
+        {label && <span className={styles.label}>{label}</span>}
         <span className={styles.percentage}>{Math.round(progress)}%</span>
       </div>
     </div>

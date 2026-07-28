@@ -36,7 +36,6 @@
   width: 22px;
   height: 22px;
   border-radius: var(--radius-full);
-  background: var(--glass-bg);
   color: var(--text-secondary);
   flex-shrink: 0;
 }
