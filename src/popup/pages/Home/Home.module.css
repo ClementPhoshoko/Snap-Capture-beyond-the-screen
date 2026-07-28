@@ -1,0 +1,14 @@
+.popup {
+  width: 100%;
+  padding: var(--popup-padding);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  position: relative;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}

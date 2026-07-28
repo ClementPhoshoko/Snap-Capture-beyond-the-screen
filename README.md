@@ -2,9 +2,9 @@
 
 > **Capture beyond the screen.**
 
-AkovoLabs Snap is a lightweight Chrome Extension that captures **high-quality full-page scrolling screenshots** by automatically scrolling through webpages, capturing each viewport, stitching the images together, and exporting a seamless final image.
+AkovoLabs Snap is a modern Chrome Extension that captures high-quality **full-page scrolling screenshots** with a single click. It automatically scrolls through the webpage, captures each viewport, stitches the images into one seamless screenshot, and downloads the final image.
 
-Designed for developers, designers, QA engineers, technical writers, marketers, students, and anyone who needs to capture entire webpages with a single click.
+Built with **React**, **JavaScript**, **Vite**, and **Chrome Extension Manifest V3**, Snap is designed to be fast, lightweight, and privacy-friendly.
 
 ---
 
@@ -14,13 +14,13 @@ Designed for developers, designers, QA engineers, technical writers, marketers, 
 - [Requirements](#requirements)
 - [Technology Stack](#technology-stack)
 - [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Development Setup](#development-setup)
+- [Getting Started](#getting-started)
+- [Development](#development)
+- [Loading the Extension](#loading-the-extension)
 - [How to Use](#how-to-use)
 - [How It Works](#how-it-works)
 - [Permissions](#permissions)
 - [Roadmap](#roadmap)
-- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -29,16 +29,13 @@ Designed for developers, designers, QA engineers, technical writers, marketers, 
 
 - Full-page scrolling screenshots
 - Visible viewport capture
-- Fast image stitching
-- High-resolution output
-- Automatic download
-- Copy image to clipboard
-- Dark mode support
-- Configurable capture settings
-- Smart handling of sticky headers
+- High-quality image stitching
+- PNG image export
+- Copy screenshots to clipboard
 - Restore original scroll position
-- PNG export
-- Lightweight and privacy-friendly
+- Configurable capture settings
+- Modern AkovoLabs interface
+- Fast and lightweight
 
 ---
 
@@ -52,39 +49,26 @@ Designed for developers, designers, QA engineers, technical writers, marketers, 
 - Opera GX
 - Any Chromium-based browser
 
----
-
 ## Development
 
 - Node.js 22+
-- npm or pnpm
+- npm
 - Git
-- Visual Studio Code (recommended)
-
----
-
-## Chrome APIs
-
-- chrome.tabs
-- chrome.scripting
-- chrome.storage
-- chrome.downloads
-- chrome.runtime
-- chrome.action
+- Visual Studio Code (Recommended)
 
 ---
 
 # Technology Stack
 
 | Technology | Purpose |
-|------------|----------|
-| React | Popup UI |
-| TypeScript | Type safety |
-| Vite | Build tool |
-| Chrome Extension Manifest V3 | Extension platform |
-| Chrome APIs | Browser integration |
-| Canvas API | Image stitching |
-| CSS | Styling |
+|------------|---------|
+| React | Popup Interface |
+| JavaScript (ES6+) | Application Logic |
+| Vite | Development & Build Tool |
+| CSS | User Interface Styling |
+| Chrome Extension Manifest V3 | Extension Platform |
+| Chrome Extension APIs | Browser Integration |
+| HTML5 Canvas API | Image Stitching |
 
 ---
 
@@ -94,59 +78,57 @@ Designed for developers, designers, QA engineers, technical writers, marketers, 
 akovolabs-snap/
 │
 ├── public/
-│   ├── icons/
 │   ├── manifest.json
+│   ├── icons/
 │   └── assets/
 │
 ├── src/
 │   │
 │   ├── popup/
-│   │   ├── pages/
 │   │   ├── components/
+│   │   ├── pages/
 │   │   ├── hooks/
-│   │   └── App.tsx
+│   │   ├── styles/
+│   │   ├── App.jsx
+│   │   └── main.jsx
 │   │
 │   ├── background/
-│   │   └── service-worker.ts
+│   │   └── service-worker.js
 │   │
 │   ├── content/
-│   │   ├── capture.ts
-│   │   ├── scroll.ts
-│   │   ├── analyzer.ts
-│   │   └── helpers.ts
-│   │
-│   ├── stitching/
-│   │   ├── canvas.ts
-│   │   ├── crop.ts
-│   │   └── merge.ts
-│   │
-│   ├── services/
-│   │   ├── download.ts
-│   │   ├── storage.ts
-│   │   └── clipboard.ts
-│   │
-│   ├── types/
+│   │   ├── captureManager.js
+│   │   ├── scrollController.js
+│   │   ├── pageAnalyzer.js
+│   │   └── messaging.js
 │   │
 │   ├── utils/
+│   │   ├── imageMerger.js
+│   │   ├── cropper.js
+│   │   ├── download.js
+│   │   └── canvas.js
 │   │
-│   ├── styles/
+│   ├── shared/
+│   │   ├── constants.js
+│   │   ├── storage.js
+│   │   └── helpers.js
 │   │
-│   └── main.tsx
+│   └── styles/
+│       ├── global-tokens.css
+│       └── globals.css
 │
 ├── package.json
-├── tsconfig.json
-├── vite.config.ts
+├── vite.config.js
 └── README.md
 ```
 
 ---
 
-# Installation
+# Getting Started
 
 Clone the repository.
 
 ```bash
-git clone https://github.com/yourusername/akovolabs-snap.git
+git clone https://github.com/ClementPhoshoko/akovolabs-snap.git
 ```
 
 Move into the project.
@@ -161,29 +143,23 @@ Install dependencies.
 npm install
 ```
 
+---
+
+# Development
+
+Start the development server.
+
+```bash
+npm run dev
+```
+
 Build the extension.
 
 ```bash
 npm run build
 ```
 
----
-
-# Development Setup
-
-Run the development server.
-
-```bash
-npm run dev
-```
-
-Build production files.
-
-```bash
-npm run build
-```
-
-Preview production build.
+Preview the production build.
 
 ```bash
 npm run preview
@@ -191,67 +167,37 @@ npm run preview
 
 ---
 
-# How to Use
+# Loading the Extension
 
-## 1. Load the Extension
+After building the project:
 
-Open Chrome.
+1. Open Chrome.
+2. Navigate to:
 
-Navigate to
-
-```
+```text
 chrome://extensions
 ```
 
-Enable **Developer Mode**.
-
-Select
-
-```
-Load unpacked
-```
-
-Choose the generated extension folder.
+3. Enable **Developer Mode**.
+4. Click **Load unpacked**.
+5. Select the project's build output folder.
+6. Pin **AkovoLabs Snap** to the Chrome toolbar.
 
 ---
 
-## 2. Open Any Website
+# How to Use
 
-Navigate to the webpage you want to capture.
-
----
-
-## 3. Launch AkovoLabs Snap
-
-Click the extension icon in the Chrome toolbar.
-
----
-
-## 4. Choose Capture Mode
-
-- Capture Visible Screen
-- Capture Full Page
-
----
-
-## 5. Capture Process
-
-AkovoLabs Snap will automatically:
-
-- Measure the page
-- Scroll the page
-- Capture every viewport
-- Stitch images together
-- Restore the original scroll position
-
----
-
-## 6. Export
-
-Choose to:
-
-- Download PNG
-- Copy to Clipboard
+1. Open any webpage.
+2. Click the **AkovoLabs Snap** extension icon.
+3. Choose one of the available capture modes:
+   - Capture Visible Screen
+   - Capture Full Page
+4. Wait while Snap:
+   - Measures the webpage
+   - Scrolls automatically
+   - Captures each viewport
+   - Stitches all images together
+5. Download the final screenshot or copy it to your clipboard.
 
 ---
 
@@ -261,7 +207,7 @@ Choose to:
 User
  │
  ▼
-Popup
+Popup (React)
  │
  ▼
 Background Service Worker
@@ -276,19 +222,16 @@ Analyze Webpage
 Calculate Scroll Positions
  │
  ▼
-Capture Viewports
+Scroll & Capture
  │
  ▼
 Merge Images
  │
  ▼
-Crop Overlap
+Generate Final PNG
  │
  ▼
-Generate PNG
- │
- ▼
-Download
+Download / Clipboard
 ```
 
 ---
@@ -296,13 +239,13 @@ Download
 # Permissions
 
 | Permission | Purpose |
-|------------|----------|
-| tabs | Capture current tab |
-| activeTab | Access active page |
-| scripting | Inject content scripts |
-| storage | Save user settings |
-| downloads | Download screenshots |
-| host_permissions | Capture webpage contents |
+|------------|---------|
+| `activeTab` | Access the active tab |
+| `tabs` | Capture browser tabs |
+| `scripting` | Inject content scripts |
+| `storage` | Save extension settings |
+| `downloads` | Download screenshots |
+| `host_permissions` | Access webpage content during capture |
 
 ---
 
@@ -310,54 +253,36 @@ Download
 
 ## Version 1
 
-- Full page screenshots
-- Visible screenshots
+- Full-page capture
+- Visible viewport capture
 - PNG export
-
----
 
 ## Version 2
 
-- JPEG export
 - PDF export
-- Copy to clipboard
+- JPEG export
 - Keyboard shortcuts
-
----
+- Capture timer
 
 ## Version 3
 
-- Annotations
+- Annotation tools
 - Blur sensitive information
-- Watermarks
-- OCR
-
----
+- Watermark support
+- OCR text extraction
 
 ## Version 4
 
 - AI page summarization
-- Cloud synchronization
 - Screenshot history
+- Cloud synchronization
 - Team sharing
-
----
-
-# Contributing
-
-Contributions are welcome.
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Commit your changes.
-4. Push your branch.
-5. Open a Pull Request.
 
 ---
 
 # License
 
-MIT License
+This project is licensed under the MIT License.
 
 ---
 

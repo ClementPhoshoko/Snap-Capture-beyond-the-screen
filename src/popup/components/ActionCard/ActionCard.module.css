@@ -1,0 +1,73 @@
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    background var(--duration-fast) var(--ease-default),
+    box-shadow var(--duration-fast) var(--ease-default);
+  outline: none;
+}
+
+.card.default {
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(var(--glass-blur-md));
+  -webkit-backdrop-filter: blur(var(--glass-blur-md));
+  border-radius: var(--radius-md);
+}
+
+.card.default:hover {
+  background: var(--glass-bg-elevated);
+  box-shadow: var(--glass-shadow);
+}
+
+.card.primary {
+  background: var(--brand-primary);
+  box-shadow: var(--glass-shadow-sm);
+  border-radius: var(--radius-md);
+}
+
+.card.primary:hover {
+  filter: brightness(1.1);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--glass-border-focus);
+  outline-offset: 2px;
+}
+
+.iconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.card.default .iconWrap {
+  color: var(--brand-primary);
+}
+
+.card.primary .iconWrap {
+  color: #fff;
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
+}
+
+.card.default .label {
+  color: var(--text-primary);
+}
+
+.card.primary .label {
+  color: #fff;
+}
