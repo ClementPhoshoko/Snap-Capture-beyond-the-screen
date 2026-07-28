@@ -1,12 +1,7 @@
-import React from "react";
+import Home from "./pages/Home";
 
 function App() {
-  return (
-    <div className="app">
-      <h1>AkovoLabs Snap</h1>
-      <p>Capture beyond the screen.</p>
-    </div>
-  );
+  return <Home />;
 }
 
 export default App;

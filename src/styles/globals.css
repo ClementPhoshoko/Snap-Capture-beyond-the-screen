@@ -8,13 +8,22 @@
   padding: 0;
 }
 
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
 body {
   font-family: var(--font-family);
   font-size: var(--font-size-md);
-  color: var(--color-text);
-  background-color: var(--color-bg);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  background: var(--gradient-bg-vibrant);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
 }
 
 button {
@@ -22,6 +31,9 @@ button {
   border: none;
   outline: none;
   font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
 }
 
 a {
@@ -32,4 +44,26 @@ a {
 img {
   max-width: 100%;
   display: block;
+}
+
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+::selection {
+  background: rgba(124, 92, 252, 0.35);
+  color: var(--text-primary);
 }

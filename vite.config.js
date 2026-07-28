@@ -4,10 +4,15 @@ import { resolve } from "path";
 
 export default defineConfig({
   plugins: [react()],
+  base: "./",
   build: {
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, "src/popup/main.jsx"),
+        popup: resolve(__dirname, "popup.html"),
+        "background/service-worker": resolve(
+          __dirname,
+          "src/background/service-worker.js"
+        ),
       },
       output: {
         entryFileNames: "[name].js",
