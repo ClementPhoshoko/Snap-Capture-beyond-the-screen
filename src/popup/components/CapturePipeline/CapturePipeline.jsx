@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import StatusIndicator from "../StatusIndicator";
-import GlassCard from "../GlassCard";
 import styles from "./CapturePipeline.module.css";
 
 export default function CapturePipeline({ items }) {
@@ -19,10 +18,11 @@ export default function CapturePipeline({ items }) {
 
 function CapturePipelineItem({ item, index }) {
   const isActive = item.status === "active";
+  const Icon = item.icon;
 
   return (
     <motion.div
-      className={`${styles.item} ${isActive ? styles.itemActive : ""}`}
+      className={styles.item}
       initial={{ opacity: 0, x: -12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{
@@ -32,12 +32,19 @@ function CapturePipelineItem({ item, index }) {
       }}
     >
       <div className={styles.left}>
-        <StatusIndicator status={item.status} size={18} />
+        {Icon && (
+          <div className={styles.iconBox}>
+            <Icon size={14} />
+          </div>
+        )}
         <div className={styles.text}>
-          <span className={styles.title}>{item.title}</span>
+          <span className={`${styles.title} ${isActive ? styles.titleActive : ""}`}>
+            {item.title}
+          </span>
           <span className={styles.description}>{item.description}</span>
         </div>
       </div>
+      <StatusIndicator status={item.status} size={16} />
     </motion.div>
   );
 }
