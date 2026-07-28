@@ -16,7 +16,7 @@ function CaptureStatCard({ stat }) {
   return (
     <div className={styles.card}>
       <div className={styles.iconWrap}>
-        <Icon size={16} />
+        <Icon size={14} />
       </div>
       <div className={styles.text}>
         <span className={styles.label}>{stat.label}</span>

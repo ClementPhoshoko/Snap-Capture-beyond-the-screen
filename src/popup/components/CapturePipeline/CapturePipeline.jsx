@@ -32,7 +32,7 @@ function CapturePipelineItem({ item, index }) {
       }}
     >
       <div className={styles.left}>
-        <StatusIndicator status={item.status} size={22} />
+        <StatusIndicator status={item.status} size={18} />
         <div className={styles.text}>
           <span className={styles.title}>{item.title}</span>
           <span className={styles.description}>{item.description}</span>
