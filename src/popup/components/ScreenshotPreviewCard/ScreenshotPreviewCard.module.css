@@ -1,0 +1,95 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--card-radius);
+  backdrop-filter: blur(var(--glass-blur-md));
+  -webkit-backdrop-filter: blur(var(--glass-blur-md));
+  overflow: hidden;
+}
+
+.preview {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: var(--space-4);
+  overflow: hidden;
+}
+
+.image {
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  box-shadow:
+    8px -8px 24px rgba(0, 0, 0, 0.18),
+    -8px 8px 24px rgba(0, 0, 0, 0.18);
+  transform-origin: center center;
+  transition: transform var(--duration-normal) var(--ease-default);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+}
+
+.placeholderBar {
+  border-radius: var(--radius-xs);
+  background: var(--glass-bg);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--glass-border-subtle);
+}
+
+.zoomBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+  outline: none;
+}
+
+.zoomBtn:hover {
+  background: var(--interactive-bg-hover);
+  color: var(--text-primary);
+}
+
+.zoomBtn:focus-visible {
+  outline: 2px solid var(--glass-border-focus);
+  outline-offset: 2px;
+}
+
+.zoomLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  min-width: 32px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

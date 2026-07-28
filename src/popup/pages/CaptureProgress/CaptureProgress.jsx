@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -62,9 +62,10 @@ const STATS = [
   { label: "Est. Time", value: "~18 sec", icon: Clock },
 ];
 
-export default function CaptureProgressScreen({ onClose, onBack }) {
+export default function CaptureProgressScreen({ onClose, onBack, onComplete }) {
   const [progress, setProgress] = useState(34);
   const [pipelineItems, setPipelineItems] = useState(PIPELINE_ITEMS);
+  const completedRef = useRef(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -77,7 +78,8 @@ export default function CaptureProgressScreen({ onClose, onBack }) {
   }, []);
 
   useEffect(() => {
-    if (progress >= 100) {
+    if (progress >= 100 && !completedRef.current) {
+      completedRef.current = true;
       setPipelineItems((prev) =>
         prev.map((item) => {
           if (item.status === "active") return { ...item, status: "completed" };
@@ -85,8 +87,10 @@ export default function CaptureProgressScreen({ onClose, onBack }) {
           return item;
         })
       );
+      const timeout = setTimeout(() => onComplete?.(), 600);
+      return () => clearTimeout(timeout);
     }
-  }, [progress]);
+  }, [progress, onComplete]);
 
   return (
     <motion.div
