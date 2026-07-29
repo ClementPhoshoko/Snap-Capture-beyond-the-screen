@@ -2,8 +2,8 @@ import { showCaptureOverlay, hideCaptureOverlay } from "./captureOverlay.js";
 import { analyzePage, hidePositionedElements } from "./pageAnalyzer.js";
 import { scrollTo, restoreScrollPosition, getScrollPosition, delay } from "./scrollController.js";
 import { sendProgress, sendComplete, sendError, captureTab, downloadResult } from "./messaging.js";
-import { createScrollPlan, outputDimensions, assertCanvasSize } from "../shared/captureMath.js";
-import { POST_SCROLL_SETTLE_MS } from "../shared/constants.js";
+import { createScrollPlan, outputDimensions, assertCanvasSize, pageExceedsLimits } from "../shared/captureMath.js";
+import { POST_SCROLL_SETTLE_MS, CAPTURE_TIMEOUT_MS } from "../shared/constants.js";
 import { dataUrlSize, formatBytes, formatToDetails, qualityToNumber } from "../shared/helpers.js";
 
 let cancelled = false;
@@ -59,6 +59,10 @@ async function captureVisible(settings) {
 async function captureFullPage(settings) {
   sendProgress("analyze", 5);
   let page = analyzePage();
+  if (pageExceedsLimits(page.scrollHeight, page.vpHeight)) {
+    throw new Error("Page exceeds the maximum capturable height. Reduce browser zoom or capture in sections.");
+  }
+  const captureStart = Date.now();
   const positions = createScrollPlan(page.scrollHeight, page.vpHeight);
   const captures = [];
   let restoreFloatingElements = () => {};
@@ -66,10 +70,16 @@ async function captureFullPage(settings) {
   try {
     for (let index = 0; index < positions.length; index += 1) {
       checkCancelled();
+      if (Date.now() - captureStart > CAPTURE_TIMEOUT_MS) {
+        throw new Error("Capture timed out — the page is too long or taking too long to render.");
+      }
       if (index === 1) restoreFloatingElements = hidePositionedElements(settings);
       scrollTo(positions[index]);
       await settlePage();
       const actualY = getScrollPosition();
+      if (index > 0 && actualY === captures[index - 1].y) {
+        continue;
+      }
       const imageData = await captureWithoutOverlay();
       captures.push({ imageData, y: actualY });
       sendProgress("capture", 10 + ((index + 1) / positions.length) * 65, { currentSection: index + 1, totalSections: positions.length });

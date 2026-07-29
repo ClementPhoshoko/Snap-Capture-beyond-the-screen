@@ -2,6 +2,9 @@ export const CAPTURE_INTERVAL_MS = 550;
 export const POST_SCROLL_SETTLE_MS = 250;
 export const MAX_OUTPUT_DIMENSION = 32767;
 export const MAX_OUTPUT_PIXELS = 120_000_000;
+export const MAX_SCROLL_STEPS = 300;
+export const MAX_PAGE_HEIGHT = 200_000;
+export const CAPTURE_TIMEOUT_MS = 120_000;
 
 export const DEFAULT_SETTINGS = Object.freeze({
   format: "png",

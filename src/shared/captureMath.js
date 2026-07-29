@@ -1,13 +1,23 @@
-import { MAX_OUTPUT_DIMENSION, MAX_OUTPUT_PIXELS } from "./constants.js";
+import { MAX_OUTPUT_DIMENSION, MAX_OUTPUT_PIXELS, MAX_SCROLL_STEPS, MAX_PAGE_HEIGHT } from "./constants.js";
 
 export function createScrollPlan(scrollHeight, viewportHeight) {
   const height = Math.max(0, Math.ceil(scrollHeight));
   const viewport = Math.max(1, Math.floor(viewportHeight));
   const maxScroll = Math.max(0, height - viewport);
   const positions = [0];
-  for (let y = viewport; y < maxScroll; y += viewport) positions.push(y);
-  if (maxScroll > 0 && positions[positions.length - 1] !== maxScroll) positions.push(maxScroll);
+  let steps = 0;
+  for (let y = viewport; y < maxScroll && steps < MAX_SCROLL_STEPS; y += viewport) {
+    positions.push(y);
+    steps += 1;
+  }
+  if (maxScroll > 0 && positions[positions.length - 1] !== maxScroll && steps < MAX_SCROLL_STEPS) {
+    positions.push(maxScroll);
+  }
   return positions;
+}
+
+export function pageExceedsLimits(scrollHeight, viewportHeight) {
+  return scrollHeight > MAX_PAGE_HEIGHT;
 }
 
 export function outputDimensions(width, cssHeight, scaleX, scaleY = scaleX) {
