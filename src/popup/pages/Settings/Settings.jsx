@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, X, SlidersHorizontal, Clock, Eye, EyeOff, FileText, Palette, SunMoon, RefreshCw } from "lucide-react";
 import GlassCard from "../../components/GlassCard";
@@ -38,6 +37,12 @@ const delayOptions = [
   { value: "2", label: "2 seconds" },
   { value: "5", label: "5 seconds" },
   { value: "10", label: "10 seconds" },
+];
+
+const floatingOptions = [
+  { value: "smart", label: "Smart (top/bottom bars)" },
+  { value: "none", label: "Keep floating UI" },
+  { value: "all", label: "Hide all floating UI" },
 ];
 
 const namingOptions = [
@@ -107,6 +112,20 @@ export default function Settings({ onBack, onClose, theme, accent, onThemeChange
                   options={qualityOptions}
                   value={settings.quality}
                   onChange={(v) => update("quality", v)}
+                />
+              }
+            />
+            <div className={styles.divider} />
+            <SettingsRow
+              icon={EyeOff}
+              label="Floating Navigation"
+              description="Hide wide fixed or sticky bars at the top and bottom"
+              variant="column"
+              control={
+                <SettingsSelect
+                  options={floatingOptions}
+                  value={settings.floatingMode}
+                  onChange={(v) => update("floatingMode", v)}
                 />
               }
             />

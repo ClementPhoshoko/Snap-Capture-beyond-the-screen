@@ -29,11 +29,14 @@ Built with **React**, **JavaScript**, **Vite**, and **Chrome Extension Manifest 
 
 - Full-page scrolling screenshots
 - Visible viewport capture
-- High-quality image stitching
-- PNG image export
+- Seamless, cropped image stitching without duplicate final viewports
+- PNG, JPEG, and WebP export
 - Copy screenshots to clipboard
-- Restore original scroll position
-- Configurable capture settings
+- Download screenshots with configurable, safe filenames
+- Restore the original scroll position and page styles after capture
+- Smart floating navigation handling: keep the first viewport natural, then hide repeated top/bottom bars
+- Configurable quality, capture delay, output format, save prompt, and floating UI behavior
+- Local settings and metadata-only capture history
 - Modern AkovoLabs interface
 - Fast and lightweight
 
@@ -194,10 +197,24 @@ chrome://extensions
    - Capture Full Page
 4. Wait while Snap:
    - Measures the webpage
-   - Scrolls automatically
+   - Captures the first viewport as it appears
+   - Hides repeated floating navigation for later viewports when Smart mode is enabled
+   - Scrolls automatically at a browser-safe capture rate
    - Captures each viewport
-   - Stitches all images together
+   - Stitches and crops images into one output
 5. Download the final screenshot or copy it to your clipboard.
+
+### Floating Navigation
+
+Full-page screenshots keep the navigation visible in the first viewport, then hide detected repeated floating bars in subsequent viewports. This makes the image read like a document instead of repeating the same header or footer.
+
+Choose **Settings → Floating Navigation** to select:
+
+- **Smart (top/bottom bars)** — recommended; detects wide edge-anchored navigation layers.
+- **Keep floating UI** — captures the page exactly as displayed.
+- **Hide all floating UI** — more aggressive fixed/sticky removal.
+
+Elements marked with `data-snap-keep` are never hidden. Some browser-owned UI, closed shadow roots, and cross-origin frames cannot be modified by an extension.
 
 ---
 
@@ -245,7 +262,15 @@ Download / Clipboard
 | `scripting` | Inject content scripts |
 | `storage` | Save extension settings |
 | `downloads` | Download screenshots |
-| `host_permissions` | Access webpage content during capture |
+
+Snap uses the user-invoked `activeTab` permission rather than persistent access to every website.
+
+## Capture Limits
+
+- Designed for desktop Chromium browsers (Chrome 120+, Edge, Brave, Opera, and similar browsers).
+- Browser-internal pages, PDF viewers, and pages that block script injection cannot be captured as full pages.
+- Extremely tall/high-resolution pages may exceed safe browser canvas limits; Snap stops with an error instead of creating a corrupted image.
+- Dynamic, infinite-scroll pages can change while being captured. For the most predictable result, wait for the page to finish loading before starting a capture.
 
 ---
 

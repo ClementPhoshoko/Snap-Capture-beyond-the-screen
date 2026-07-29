@@ -29,7 +29,9 @@ export async function startCapture({ mode, settings = {} }) {
       await delay(Number(settings.delay) * 1000);
     }
     checkCancelled();
-    restoreElements = hidePositionedElements(settings);
+    // A full-page image intentionally keeps its first viewport intact. This
+    // presents the page naturally once, then removes repeated floating chrome.
+    if (mode !== "fullpage") restoreElements = hidePositionedElements(settings);
     const result = mode === "fullpage" ? await captureFullPage(settings) : await captureVisible(settings);
     sendComplete(result);
     if (settings.autoDownload) await downloadResult(result, settings);
@@ -59,29 +61,35 @@ async function captureFullPage(settings) {
   let page = analyzePage();
   const positions = createScrollPlan(page.scrollHeight, page.vpHeight);
   const captures = [];
+  let restoreFloatingElements = () => {};
   sendProgress("scroll", 10, { currentSection: 0, totalSections: positions.length });
-  for (let index = 0; index < positions.length; index += 1) {
-    checkCancelled();
-    scrollTo(positions[index]);
-    await settlePage();
-    const actualY = getScrollPosition();
-    const imageData = await captureWithoutOverlay();
-    captures.push({ imageData, y: actualY });
-    sendProgress("capture", 10 + ((index + 1) / positions.length) * 65, { currentSection: index + 1, totalSections: positions.length });
+  try {
+    for (let index = 0; index < positions.length; index += 1) {
+      checkCancelled();
+      if (index === 1) restoreFloatingElements = hidePositionedElements(settings);
+      scrollTo(positions[index]);
+      await settlePage();
+      const actualY = getScrollPosition();
+      const imageData = await captureWithoutOverlay();
+      captures.push({ imageData, y: actualY });
+      sendProgress("capture", 10 + ((index + 1) / positions.length) * 65, { currentSection: index + 1, totalSections: positions.length });
+    }
+    // A lazy-loaded page may have grown; capture the newly exposed tail once.
+    page = analyzePage();
+    const finalPlan = createScrollPlan(page.scrollHeight, page.vpHeight);
+    const tailY = finalPlan.at(-1);
+    if (tailY > captures.at(-1).y) {
+      scrollTo(tailY);
+      await settlePage();
+      captures.push({ imageData: await captureWithoutOverlay(), y: getScrollPosition() });
+    }
+    sendProgress("merge", 78);
+    const rendered = await stitchCaptures(captures, page, settings);
+    sendProgress("finalize", 94);
+    return buildResult(rendered.dataUrl, rendered.width, rendered.height, "fullpage", settings);
+  } finally {
+    restoreFloatingElements();
   }
-  // A lazy-loaded page may have grown; capture the newly exposed tail once.
-  page = analyzePage();
-  const finalPlan = createScrollPlan(page.scrollHeight, page.vpHeight);
-  const tailY = finalPlan.at(-1);
-  if (tailY > captures.at(-1).y) {
-    scrollTo(tailY);
-    await settlePage();
-    captures.push({ imageData: await captureWithoutOverlay(), y: getScrollPosition() });
-  }
-  sendProgress("merge", 78);
-  const rendered = await stitchCaptures(captures, page, settings);
-  sendProgress("finalize", 94);
-  return buildResult(rendered.dataUrl, rendered.width, rendered.height, "fullpage", settings);
 }
 
 function hideOverlayForCapture() {
