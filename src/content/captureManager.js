@@ -48,9 +48,7 @@ async function captureVisible(settings) {
   sendProgress("capture", 30);
   await settlePage();
   checkCancelled();
-  hideOverlayForCapture();
-  const imageData = await captureTab();
-  showOverlayAfterCapture();
+  const imageData = await captureWithoutOverlay();
   sendProgress("finalize", 90);
   const rendered = await convertImage(imageData, settings);
   return buildResult(rendered.dataUrl, rendered.width, rendered.height, "visible", settings);
@@ -67,9 +65,7 @@ async function captureFullPage(settings) {
     scrollTo(positions[index]);
     await settlePage();
     const actualY = getScrollPosition();
-    hideOverlayForCapture();
-    const imageData = await captureTab();
-    showOverlayAfterCapture();
+    const imageData = await captureWithoutOverlay();
     captures.push({ imageData, y: actualY });
     sendProgress("capture", 10 + ((index + 1) / positions.length) * 65, { currentSection: index + 1, totalSections: positions.length });
   }
@@ -80,9 +76,7 @@ async function captureFullPage(settings) {
   if (tailY > captures.at(-1).y) {
     scrollTo(tailY);
     await settlePage();
-    hideOverlayForCapture();
-    captures.push({ imageData: await captureTab(), y: getScrollPosition() });
-    showOverlayAfterCapture();
+    captures.push({ imageData: await captureWithoutOverlay(), y: getScrollPosition() });
   }
   sendProgress("merge", 78);
   const rendered = await stitchCaptures(captures, page, settings);
@@ -97,6 +91,17 @@ function hideOverlayForCapture() {
 function showOverlayAfterCapture() {
   const el = document.getElementById("snap-capture-overlay");
   if (el) el.style.display = "";
+}
+
+async function captureWithoutOverlay() {
+  hideOverlayForCapture();
+  // Let the browser paint the hidden state before Chrome snapshots the tab.
+  await nextFrame();
+  try {
+    return await captureTab();
+  } finally {
+    showOverlayAfterCapture();
+  }
 }
 
 function loadImage(src) {
