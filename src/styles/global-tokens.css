@@ -202,100 +202,98 @@
 }
 
 /* ============================================
-   Light Theme — Glass Water
+   Light Theme — Google Material
    ============================================ */
 [data-theme="light"] {
-  /* Brand — Apple blue */
-  --brand-primary: #007aff;
-  --brand-primary-light: #409cff;
-  --brand-primary-dark: #0056cc;
-  --brand-secondary: #34c759;
-  --brand-secondary-light: #5ddb7c;
-  --brand-accent: #ff3b30;
+  /* Brand — Google Blue */
+  --brand-primary: #1a73e8;
+  --brand-primary-light: #4a8ff5;
+  --brand-primary-dark: #1557b0;
+  --brand-secondary: #34a853;
+  --brand-secondary-light: #5bb974;
+  --brand-accent: #ea4335;
 
-  /* Glass blur — very high for watery frosted effect */
-  --glass-blur-sm: 20px;
-  --glass-blur-md: 45px;
-  --glass-blur-lg: 60px;
-  --glass-blur-xl: 80px;
+  /* Glass blur — disabled for flat look */
+  --glass-blur-sm: 0px;
+  --glass-blur-md: 0px;
+  --glass-blur-lg: 0px;
+  --glass-blur-xl: 0px;
 
-  /* Glass — Background (highly transparent, like clear water) */
-  --glass-bg: rgba(255, 255, 255, 0.40);
-  --glass-bg-hover: rgba(255, 255, 255, 0.54);
-  --glass-bg-active: rgba(255, 255, 255, 0.66);
-  --glass-bg-solid: rgba(255, 255, 255, 0.70);
-  --glass-bg-elevated: rgba(255, 255, 255, 0.32);
-  --glass-bg-surface: rgba(255, 255, 255, 0.46);
+  /* Glass — Background (opaque flat surfaces) */
+  --glass-bg: #ffffff;
+  --glass-bg-hover: #f1f3f4;
+  --glass-bg-active: #e8eaed;
+  --glass-bg-solid: #ffffff;
+  --glass-bg-elevated: #f8f9fa;
+  --glass-bg-surface: #ffffff;
 
-  /* Glass — Borders (white reflection edges like wet glass) */
-  --glass-border: rgba(255, 255, 255, 0.35);
-  --glass-border-strong: rgba(255, 255, 255, 0.55);
-  --glass-border-subtle: rgba(255, 255, 255, 0.15);
-  --glass-border-focus: rgba(0, 122, 255, 0.50);
+  /* Glass — Borders (Google grey) */
+  --glass-border: #dadce0;
+  --glass-border-strong: #bdc1c6;
+  --glass-border-subtle: #e8eaed;
+  --glass-border-focus: rgba(26, 115, 232, 0.50);
 
-  /* Glass — Shadows (blue-tinted water depth) */
+  /* Glass — Shadows (Google elevation) */
   --glass-shadow-sm:
-    0 2px 8px rgba(0, 40, 70, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.70);
+    0 1px 2px rgba(60, 64, 67, 0.08),
+    0 1px 3px rgba(60, 64, 67, 0.06);
   --glass-shadow-md:
-    0 6px 20px rgba(0, 40, 70, 0.09),
-    0 2px 6px rgba(0, 40, 70, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.70);
+    0 2px 6px rgba(60, 64, 67, 0.10),
+    0 1px 4px rgba(60, 64, 67, 0.06);
   --glass-shadow-lg:
-    0 12px 40px rgba(0, 40, 70, 0.11),
-    0 4px 12px rgba(0, 40, 70, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    0 4px 16px rgba(60, 64, 67, 0.12),
+    0 2px 8px rgba(60, 64, 67, 0.08);
   --glass-shadow-glow:
-    0 0 20px rgba(0, 122, 255, 0.18);
+    0 0 20px rgba(26, 115, 232, 0.16);
   --glass-shadow-glow-accent:
-    0 0 20px rgba(52, 199, 89, 0.18);
+    0 0 20px rgba(52, 168, 83, 0.16);
 
-  /* Gradient — Backgrounds (water blue) */
-  --gradient-bg: linear-gradient(145deg, #cce6f5 0%, #e0f0fa 45%, #eef6fc 100%);
-  --gradient-bg-vibrant: linear-gradient(145deg, #bfdef0 0%, #d4eaf5 50%, #e6f2f8 100%);
+  /* Gradient — Backgrounds (Google clean white) */
+  --gradient-bg: #ffffff;
+  --gradient-bg-vibrant: #f8f9fa;
   --gradient-accent: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-light));
-  --gradient-accent-subtle: linear-gradient(135deg, rgba(0, 122, 255, 0.10), rgba(64, 156, 255, 0.10));
-  --gradient-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.40));
+  --gradient-accent-subtle: linear-gradient(135deg, rgba(26, 115, 232, 0.08), rgba(74, 143, 245, 0.08));
+  --gradient-surface: linear-gradient(180deg, #ffffff, #f8f9fa);
 
-  /* Text */
-  --text-primary: #1a1a2e;
-  --text-secondary: rgba(26, 26, 46, 0.58);
-  --text-tertiary: rgba(26, 26, 46, 0.30);
-  --text-disabled: rgba(26, 26, 46, 0.18);
+  /* Text (Google #202124) */
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --text-tertiary: #80868b;
+  --text-disabled: #bdc1c6;
   --text-accent: var(--brand-primary);
-  --text-success: #34c759;
-  --text-error: #ff3b30;
+  --text-success: #34a853;
+  --text-error: #ea4335;
 
   /* Interactive */
-  --interactive-bg: rgba(255, 255, 255, 0.35);
-  --interactive-bg-hover: rgba(255, 255, 255, 0.50);
-  --interactive-bg-active: rgba(255, 255, 255, 0.62);
-  --interactive-bg-disabled: rgba(255, 255, 255, 0.20);
-  --interactive-border: rgba(0, 0, 0, 0.06);
-  --interactive-border-hover: rgba(0, 0, 0, 0.12);
+  --interactive-bg: #f1f3f4;
+  --interactive-bg-hover: #e8eaed;
+  --interactive-bg-active: #dadce0;
+  --interactive-bg-disabled: #f8f9fa;
+  --interactive-border: #dadce0;
+  --interactive-border-hover: #bdc1c6;
 
   /* Status */
-  --status-success: #34c759;
-  --status-success-bg: rgba(52, 199, 89, 0.12);
-  --status-error: #ff3b30;
-  --status-error-bg: rgba(255, 59, 48, 0.12);
-  --status-warning: #ff9500;
-  --status-warning-bg: rgba(255, 149, 0, 0.12);
-  --status-info: #007aff;
-  --status-info-bg: rgba(0, 122, 255, 0.12);
+  --status-success: #34a853;
+  --status-success-bg: #e6f4ea;
+  --status-error: #ea4335;
+  --status-error-bg: #fce8e6;
+  --status-warning: #fbbc04;
+  --status-warning-bg: #fef7e0;
+  --status-info: #1a73e8;
+  --status-info-bg: #e8f0fe;
 
   /* Card */
   --card-bg: var(--glass-bg);
   --card-border: var(--glass-border);
-  --card-radius: var(--radius-xl);
+  --card-radius: var(--radius-md);
   --card-shadow: var(--glass-shadow-sm);
   --card-padding: var(--space-4);
-  --card-backdrop: blur(var(--glass-blur-md));
+  --card-backdrop: none;
 
   /* Input */
-  --input-bg: rgba(255, 255, 255, 0.40);
-  --input-bg-focus: rgba(255, 255, 255, 0.55);
-  --input-border: rgba(0, 0, 0, 0.08);
+  --input-bg: #ffffff;
+  --input-bg-focus: #ffffff;
+  --input-border: #dadce0;
   --input-border-focus: var(--brand-primary);
   --input-radius: var(--radius-sm);
   --input-height: var(--btn-height-md);
@@ -303,6 +301,6 @@
   /* Scrollbar */
   --scrollbar-width: 6px;
   --scrollbar-track: transparent;
-  --scrollbar-thumb: rgba(0, 0, 0, 0.12);
-  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.20);
+  --scrollbar-thumb: #dadce0;
+  --scrollbar-thumb-hover: #bdc1c6;
 }
