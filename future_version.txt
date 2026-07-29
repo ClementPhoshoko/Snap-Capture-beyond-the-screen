@@ -1,0 +1,11 @@
+in settings we should add the section and row for the entering the Gemini API key right below the Capture section, user must populate the input field will then be filled with *******... to never expose it
+
+Maybe V4:
+    AI page summary
+    AI explain screenshot
+    AI smart filename generation
+    AI searchable history
+    Cloud sync
+    Team sharing
+
+AI: Gemini API (or another LLM)
