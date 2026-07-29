@@ -243,12 +243,6 @@ export default function CaptureProgressScreen({ params, onBack, onClose, onCompl
               <span className={styles.progressCount}>{progress}%</span>
             </div>
           </ProgressRing>
-          <div className={styles.statusPill}>
-            <span className={styles.statusDot} />
-            <span className={styles.statusText}>
-              {progress < 100 ? "Capturing page..." : "Finalizing..."}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -259,7 +253,7 @@ export default function CaptureProgressScreen({ params, onBack, onClose, onCompl
       {stats && (
         <CaptureStats
           stats={[
-            { label: "Sections Captured", value: `${stats.currentSection ?? 0} of ${stats.totalSections ?? 0}`, icon: Layers },
+            { label: "Sections", value: `${stats.currentSection ?? 0} of ${stats.totalSections ?? 0}`, icon: Layers },
             { label: "Progress", value: `${progress}%`, icon: Monitor },
             { label: "Status", value: progress < 100 ? "In Progress" : "Complete", icon: Clock },
           ]}
