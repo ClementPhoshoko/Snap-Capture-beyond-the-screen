@@ -6,6 +6,8 @@ import CaptureProgress from "./pages/CaptureProgress";
 import CaptureComplete from "./pages/CaptureComplete";
 import Settings from "./pages/Settings";
 import History from "./pages/History";
+import { DEFAULT_SETTINGS } from "../shared/constants";
+import { getSettings, saveSettings, resetSettings, recordCapture } from "../shared/storage";
 
 const accentValues = {
   purple: { primary: "#7c5cfc", light: "#a78bfa", dark: "#5b3fd4" },
@@ -29,6 +31,16 @@ function App() {
   const [accent, setAccent] = useState("purple");
   const [captureParams, setCaptureParams] = useState(null);
   const [captureResult, setCaptureResult] = useState(null);
+  const [captureSettings, setCaptureSettings] = useState(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    getSettings().then(setCaptureSettings).catch(() => {});
+  }, []);
+
+  const updateCaptureSettings = (next) => {
+    setCaptureSettings(next);
+    saveSettings(next).catch(() => {});
+  };
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -71,6 +83,8 @@ function App() {
               setPage("capture");
             }}
             onSettingsClick={() => setPage("settings")}
+            settings={captureSettings}
+            onSettingsChange={updateCaptureSettings}
           />
         )}
         {page === "capture" && (
@@ -81,6 +95,7 @@ function App() {
             onClose={() => setPage("home")}
             onComplete={(result) => {
               setCaptureResult(result);
+              recordCapture(result).catch(() => {});
               setPage("complete");
             }}
           />
@@ -102,6 +117,9 @@ function App() {
             accent={accent}
             onThemeChange={setTheme}
             onAccentChange={setAccent}
+            settings={captureSettings}
+            onSettingsChange={updateCaptureSettings}
+            onResetSettings={async () => updateCaptureSettings(await resetSettings())}
           />
         )}
         {page === "history" && (

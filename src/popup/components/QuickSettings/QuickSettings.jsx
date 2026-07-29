@@ -12,7 +12,6 @@ const formatOptions = [
 
 const locationOptions = [
   { value: "downloads", label: "Downloads" },
-  { value: "desktop", label: "Desktop" },
   { value: "ask", label: "Ask each time" },
 ];
 

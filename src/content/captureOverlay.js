@@ -53,7 +53,7 @@ function getOverlayCSS() {
   justify-content: center;
   opacity: 0;
   transition: opacity var(--duration-slow) var(--ease-out);
-  pointer-events: none;
+  pointer-events: auto;
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   color-scheme: dark;

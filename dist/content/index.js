@@ -1,5 +1,5 @@
-(function(){"use strict";const s="snap-capture-overlay",P="snap-overlay-styles",v={screenshot:{status:"Preparing capture",subtext:"Capturing visible area"},fullpage:{status:"Preparing capture",subtext:"Measuring page dimensions"}};let o=null,c=null,f=null;function T(){return`
-#${s} {
+(function(){"use strict";const c="snap-capture-overlay",$="snap-overlay-styles",A={screenshot:{status:"Preparing capture",subtext:"Capturing visible area"},fullpage:{status:"Preparing capture",subtext:"Measuring page dimensions"}};let o=null,d=null,g=null;function z(){return`
+#${c} {
   --brand-primary: #7c5cfc;
   --brand-primary-light: #a78bfa;
   --text-primary: #ffffff;
@@ -34,17 +34,17 @@
   justify-content: center;
   opacity: 0;
   transition: opacity var(--duration-slow) var(--ease-out);
-  pointer-events: none;
+  pointer-events: auto;
   font-family: var(--font-family);
   -webkit-font-smoothing: antialiased;
   color-scheme: dark;
 }
 
-#${s}.snap-visible {
+#${c}.snap-visible {
   opacity: 1;
 }
 
-#${s}.snap-hiding {
+#${c}.snap-hiding {
   opacity: 0;
   transition: opacity 150ms var(--ease-out);
 }
@@ -210,26 +210,26 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #${s},
-  #${s} .snap-corner,
-  #${s} .snap-dot,
-  #${s} .snap-flash,
-  #${s} .snap-corner.animate {
+  #${c},
+  #${c} .snap-corner,
+  #${c} .snap-dot,
+  #${c} .snap-flash,
+  #${c} .snap-corner.animate {
     animation: none !important;
     transition-duration: 10ms !important;
     transition-delay: 0s !important;
   }
 
-  #${s} .snap-corner {
+  #${c} .snap-corner {
     opacity: 1;
   }
 
-  #${s} .snap-dot {
+  #${c} .snap-dot {
     opacity: 0.5;
     transform: none !important;
   }
 }
-`}function A({mode:e="screenshot"}={}){if(o)return;const t=v[e]||v.screenshot;c=document.createElement("style"),c.id=P,c.textContent=T(),document.head.appendChild(c),o=document.createElement("div"),o.id=s;const n=window.matchMedia("(prefers-reduced-motion: reduce)").matches;o.innerHTML=`
+`}function H({mode:t="screenshot"}={}){if(o)return;const e=A[t]||A.screenshot;d=document.createElement("style"),d.id=$,d.textContent=z(),document.head.appendChild(d),o=document.createElement("div"),o.id=c;const n=window.matchMedia("(prefers-reduced-motion: reduce)").matches;o.innerHTML=`
     <div class="snap-overlay-bg"></div>
     <div class="snap-corners">
       <div class="snap-corner snap-corner-tl${n?" animate":""}"></div>
@@ -238,12 +238,12 @@
       <div class="snap-corner snap-corner-bl${n?" animate":""}"></div>
     </div>
     <div class="snap-content">
-      <p class="snap-status">${t.status}</p>
-      <p class="snap-subtext">${t.subtext}</p>
+      <p class="snap-status">${e.status}</p>
+      <p class="snap-subtext">${e.subtext}</p>
       <div class="snap-dots">
         <span class="snap-dot"></span>
         <span class="snap-dot"></span>
         <span class="snap-dot"></span>
       </div>
     </div>
-  `,document.body.appendChild(o),requestAnimationFrame(()=>{o.classList.add("snap-visible"),n||requestAnimationFrame(()=>{o.querySelectorAll(".snap-corner").forEach(r=>r.classList.add("animate"))})}),e==="screenshot"&&(f=setTimeout(()=>{m()},2e3))}function m(){if(f&&(clearTimeout(f),f=null),!o)return;const e=document.createElement("div");e.className="snap-flash",o.appendChild(e),o.classList.remove("snap-visible"),o.classList.add("snap-hiding"),setTimeout(()=>{o&&o.parentNode&&o.parentNode.removeChild(o),c&&c.parentNode&&c.parentNode.removeChild(c),o=null,c=null},400)}function R(){const e=Math.max(document.body.scrollHeight,document.documentElement.scrollHeight,document.body.offsetHeight,document.documentElement.offsetHeight),t=window.innerHeight,n=window.innerWidth,a=Math.ceil(e/t),r=[],p=[];return document.body&&document.body.querySelectorAll("*").forEach(l=>{const i=getComputedStyle(l).position;i==="sticky"?r.push(l):i==="fixed"&&p.push(l)}),{scrollHeight:e,vpHeight:t,vpWidth:n,totalSections:a,stickyElements:r,fixedElements:p}}function U(e,t){const n=[];for(let a=0;a<e;a++)n.push({index:a,y:a*t,height:t});return n}function M(e){window.scrollTo({top:e,behavior:"instant"})}function _(){return window.scrollY||window.pageYOffset||0}function O(e){window.scrollTo({top:e,behavior:"instant"})}function $(e){return new Promise(t=>setTimeout(t,e))}const u=Object.freeze({START_CAPTURE:"SNAP/START_CAPTURE",CAPTURE_PROGRESS:"SNAP/CAPTURE_PROGRESS",CAPTURE_COMPLETE:"SNAP/CAPTURE_COMPLETE",CAPTURE_ERROR:"SNAP/CAPTURE_ERROR",CAPTURE_TAB:"SNAP/CAPTURE_TAB"});function z(e,t,n={}){return{type:u.CAPTURE_PROGRESS,payload:{stage:e,percent:t,...n}}}function F(e){return{type:u.CAPTURE_COMPLETE,payload:e}}function L(e,t,n=!1){return{type:u.CAPTURE_ERROR,payload:{code:e,message:t,recoverable:n}}}new Set(Object.values(u));function d(e,t,n){chrome.runtime.sendMessage(z(e,t,n)).catch(()=>{})}function w(e){chrome.runtime.sendMessage(F(e)).catch(()=>{})}function H(e,t,n=!1){chrome.runtime.sendMessage(L(e,t,n)).catch(()=>{})}async function C(){const e=await chrome.runtime.sendMessage({type:"SNAP/CAPTURE_TAB"});if(console.log("[Snap Content] CAPTURE_TAB response:",e),!(e!=null&&e.imageData)){const t=(e==null?void 0:e.error)||"response missing imageData";throw console.error("[Snap Content] CAPTURE_TAB failed:",t),new Error(t)}return e.imageData}function x(){const e=document.getElementById("snap-capture-overlay");e&&(e.style.display="none")}function E(){const e=document.getElementById("snap-capture-overlay");e&&(e.style.display="")}function S(){return new Promise(e=>requestAnimationFrame(e))}async function I({mode:e,settings:t}){console.log("[Snap Content] startCapture called",{mode:e,settings:t}),A({mode:e});const n=e==="fullpage"?"fullpage":"visible";try{return d("analyze",5),n==="fullpage"?await N(t):await k(t)}catch(a){return m(),H("CAPTURE_FAILED",a.message,!0),{success:!1,error:a.message}}}async function N(e){const t=R(),n=U(t.totalSections,t.vpHeight),a=n.length,r=_();d("scroll",10,{currentSection:0,totalSections:a});const p=[];for(const i of n){M(i.y),await $(300),d("capture",10+(i.index+1)/a*60,{currentSection:i.index+1,totalSections:a}),x(),await S();const b=await C();E(),p.push(b)}d("merge",75);const l=await B(p);if(!l)throw new Error("Failed to stitch captures");return O(r),d("finalize",90),m(),w(h(l,"fullpage",e)),{success:!0,data:h(l,"fullpage",e)}}async function k(e){d("capture",30),x(),await S();const t=await C();return E(),d("finalize",80),m(),w(h(t,"visible",e)),{success:!0,data:h(t,"visible",e)}}function h(e,t,n){const a=new Date;return{imageData:e,dimensions:t==="fullpage"?"Full page":`${window.innerWidth} × ${window.innerHeight}`,format:(n==null?void 0:n.format)||"PNG",size:G(D(e)),capturedAt:a.toISOString(),source:document.title||new URL(location.href).hostname}}async function B(e,t){const n=document.createElement("canvas"),a=n.getContext("2d"),r=[];for(const i of e){const b=await new Promise((Y,q)=>{const y=new Image;y.onload=()=>Y(y),y.onerror=q,y.src=i});r.push(b)}const p=r[0].naturalHeight,l=r[0].naturalWidth;n.width=l,n.height=p*r.length;for(let i=0;i<r.length;i++)a.drawImage(r[i],0,i*p);return n.toDataURL("image/png")}function D(e){const t=e.split(",")[1]||"";return Math.round(t.length*3/4)}function G(e){return e<1024?e+" B":e<1024*1024?(e/1024).toFixed(1)+" KB":(e/(1024*1024)).toFixed(1)+" MB"}console.log("[Snap Content] Script loaded");let g=!1;chrome.runtime.onMessage.addListener((e,t,n)=>{if(e!=null&&e.type&&(console.log("[Snap Content] Received:",e.type),e.type===u.START_CAPTURE)){if(g){console.log("[Snap Content] Capture already in progress"),n({success:!1,error:"Capture already in progress"});return}return g=!0,console.log("[Snap Content] Starting capture with payload:",e.payload),I(e.payload).then(a=>{g=!1,console.log("[Snap Content] Capture completed:",a.success),n(a)}).catch(a=>{g=!1,console.error("[Snap Content] Capture error:",a),n({success:!1,error:a.message})}),!0}})})();
+  `,document.body.appendChild(o),requestAnimationFrame(()=>{o.classList.add("snap-visible"),n||requestAnimationFrame(()=>{o.querySelectorAll(".snap-corner").forEach(r=>r.classList.add("animate"))})}),t==="screenshot"&&(g=setTimeout(()=>{S()},2e3))}function S(){if(g&&(clearTimeout(g),g=null),!o)return;const t=document.createElement("div");t.className="snap-flash",o.appendChild(t),o.classList.remove("snap-visible"),o.classList.add("snap-hiding"),setTimeout(()=>{o&&o.parentNode&&o.parentNode.removeChild(o),d&&d.parentNode&&d.parentNode.removeChild(d),o=null,d=null},400)}function R(){const t=document.documentElement,e=document.body;return{scrollHeight:Math.max((t==null?void 0:t.scrollHeight)||0,(e==null?void 0:e.scrollHeight)||0,(t==null?void 0:t.offsetHeight)||0,(e==null?void 0:e.offsetHeight)||0),vpHeight:window.innerHeight,vpWidth:window.innerWidth}}function k({hideFixed:t,ignoreSticky:e}){if(!t&&!e)return()=>{};const n=[],a=document.createTreeWalker(document.documentElement,NodeFilter.SHOW_ELEMENT);let r;for(;r=a.nextNode();){const i=getComputedStyle(r).position;(t&&i==="fixed"||e&&i==="sticky")&&(n.push({node:r,value:r.style.getPropertyValue("visibility"),priority:r.style.getPropertyPriority("visibility")}),r.style.setProperty("visibility","hidden","important"))}return()=>{for(const{node:i,value:l,priority:s}of n)l?i.style.setProperty("visibility",l,s):i.style.removeProperty("visibility")}}function _(t){window.scrollTo({top:t,behavior:"instant"})}function w(){return window.scrollY||window.pageYOffset||0}function F(t){window.scrollTo({top:t,behavior:"instant"})}function v(t){return new Promise(e=>setTimeout(e,t))}const p=Object.freeze({START_CAPTURE:"SNAP/START_CAPTURE",CAPTURE_PROGRESS:"SNAP/CAPTURE_PROGRESS",CAPTURE_COMPLETE:"SNAP/CAPTURE_COMPLETE",CAPTURE_ERROR:"SNAP/CAPTURE_ERROR",CAPTURE_TAB:"SNAP/CAPTURE_TAB",PING:"SNAP/PING",CANCEL_CAPTURE:"SNAP/CANCEL_CAPTURE",DOWNLOAD_RESULT:"SNAP/DOWNLOAD_RESULT"});function W(t,e,n={}){return{type:p.CAPTURE_PROGRESS,payload:{stage:t,percent:e,...n}}}function B(t){return{type:p.CAPTURE_COMPLETE,payload:t}}function G(t,e,n=!1){return{type:p.CAPTURE_ERROR,payload:{code:t,message:e,recoverable:n}}}new Set(Object.values(p));const u=(t,e,n)=>chrome.runtime.sendMessage(W(t,e,n)).catch(()=>{}),Y=t=>chrome.runtime.sendMessage(B(t)).catch(()=>{}),j=(t,e,n=!1)=>chrome.runtime.sendMessage(G(t,e,n)).catch(()=>{});async function b(){const t=await chrome.runtime.sendMessage({type:p.CAPTURE_TAB,payload:{}});if(!(t!=null&&t.imageData))throw new Error((t==null?void 0:t.error)||"Browser did not return an image");return t.imageData}async function q(t,e){const n=await chrome.runtime.sendMessage({type:p.DOWNLOAD_RESULT,payload:{imageData:t.imageData,title:t.title,format:t.settings.format,location:e.location,namingPattern:e.namingPattern}});if(!(n!=null&&n.success))throw new Error((n==null?void 0:n.error)||"Download failed")}const V=250,O=32767,X=12e7,M=Object.freeze({png:{mime:"image/png",extension:"png"},jpeg:{mime:"image/jpeg",extension:"jpg"},webp:{mime:"image/webp",extension:"webp"}});function N(t,e){const n=Math.max(0,Math.ceil(t)),a=Math.max(1,Math.floor(e)),r=Math.max(0,n-a),i=[0];for(let l=a;l<r;l+=a)i.push(l);return r>0&&i[i.length-1]!==r&&i.push(r),i}function K(t,e,n,a=n){return{width:Math.round(t*n),height:Math.round(e*a)}}function J({width:t,height:e}){if(!t||!e||t>O||e>O||t*e>X)throw new Error("This page is too large to safely export as one image. Reduce browser zoom or capture it in smaller sections.")}function L(t){return M[String(t||"png").toLowerCase()]||M.png}function Q(t){return{high:.92,medium:.8,low:.65}[t]??.92}function Z(t){return t<1024?`${t} B`:t<1024*1024?`${(t/1024).toFixed(1)} KB`:`${(t/(1024*1024)).toFixed(1)} MB`}function tt(t){const e=(t==null?void 0:t.split(",")[1])||"";return Math.floor(e.length*3/4)}let f=!1;function et(){f=!0}function U(){return new Promise(t=>requestAnimationFrame(t))}async function E(t=V){var e;await U(),await U(),(e=document.fonts)!=null&&e.ready&&await Promise.race([document.fonts.ready,v(1e3)]),await v(t)}function P(){if(f)throw new Error("Capture cancelled")}async function nt({mode:t,settings:e={}}){f=!1,H({mode:t});const n=w();let a=()=>{};try{Number(e.delay)>0&&(u("analyze",2,{message:`Waiting ${e.delay} seconds`}),await v(Number(e.delay)*1e3)),P(),a=k(e);const r=t==="fullpage"?await rt(e):await at(e);return Y(r),e.autoDownload&&await q(r,e),{success:!0,data:r}}catch(r){return j(f?"CAPTURE_CANCELLED":"CAPTURE_FAILED",r.message,f),{success:!1,error:r.message}}finally{a(),F(n),S()}}async function at(t){u("capture",30),await E(),P(),T();const e=await b();x(),u("finalize",90);const n=await ot(e,t);return I(n.dataUrl,n.width,n.height,"visible",t)}async function rt(t){u("analyze",5);let e=R();const n=N(e.scrollHeight,e.vpHeight),a=[];u("scroll",10,{currentSection:0,totalSections:n.length});for(let s=0;s<n.length;s+=1){P(),_(n[s]),await E();const h=w();T();const m=await b();x(),a.push({imageData:m,y:h}),u("capture",10+(s+1)/n.length*65,{currentSection:s+1,totalSections:n.length})}e=R();const i=N(e.scrollHeight,e.vpHeight).at(-1);i>a.at(-1).y&&(_(i),await E(),T(),a.push({imageData:await b(),y:w()}),x()),u("merge",78);const l=await it(a,e,t);return u("finalize",94),I(l.dataUrl,l.width,l.height,"fullpage",t)}function T(){const t=document.getElementById("snap-capture-overlay");t&&(t.style.display="none")}function x(){const t=document.getElementById("snap-capture-overlay");t&&(t.style.display="")}function C(t){return new Promise((e,n)=>{const a=new Image;a.onload=()=>e(a),a.onerror=()=>n(new Error("Unable to decode a captured image")),a.src=t})}async function it(t,e,n){if(!t.length)throw new Error("No images were captured");const a=await C(t[0].imageData),r=a.naturalWidth/e.vpWidth,i=a.naturalHeight/e.vpHeight,l=K(e.vpWidth,e.scrollHeight,r,i);J(l);const s=document.createElement("canvas");s.width=l.width,s.height=l.height;const h=s.getContext("2d",{alpha:!1});h.fillStyle="#ffffff",h.fillRect(0,0,s.width,s.height);for(let m=0;m<t.length;m+=1){const y=m===0?a:await C(t[m].imageData),st=Math.round(t[m].y*i);h.drawImage(y,0,0,y.naturalWidth,y.naturalHeight,0,st,s.width,y.naturalHeight)}return D(s,n)}async function ot(t,e){const n=await C(t),a=document.createElement("canvas");return a.width=n.naturalWidth,a.height=n.naturalHeight,a.getContext("2d").drawImage(n,0,0),D(a,e)}function D(t,e){const{mime:n}=L(e.format);return{dataUrl:t.toDataURL(n,Q(e.quality)),width:t.width,height:t.height}}function I(t,e,n,a,r){return{imageData:t,dimensions:`${e} × ${n}`,format:L(r.format).extension.toUpperCase(),size:Z(tt(t)),capturedAt:new Date().toISOString(),source:document.title||location.hostname,title:document.title||"page",domain:location.hostname,mode:a,settings:{format:r.format,location:r.location,namingPattern:r.namingPattern}}}if(!globalThis.__akovoSnapControllerInstalled){globalThis.__akovoSnapControllerInstalled=!0;let t=!1;chrome.runtime.onMessage.addListener((e,n,a)=>{if(e!=null&&e.type){if(e.type===p.PING){a({ready:!0});return}if(e.type===p.CANCEL_CAPTURE){et(),a({success:!0});return}if(e.type===p.START_CAPTURE){if(t){a({success:!1,error:"A capture is already in progress"});return}return t=!0,nt(e.payload).then(a).catch(r=>a({success:!1,error:r.message})).finally(()=>{t=!1}),!0}}})}})();

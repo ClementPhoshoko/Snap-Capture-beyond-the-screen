@@ -1,16 +1,10 @@
 {
   "manifest_version": 3,
   "name": "AkovoLabs Snap",
-  "version": "1.0.0",
-  "description": "Capture beyond the screen. A modern Chrome Extension for full-page scrolling screenshots.",
-  "permissions": [
-    "activeTab",
-    "tabs",
-    "scripting",
-    "storage",
-    "downloads"
-  ],
-  "host_permissions": ["<all_urls>"],
+  "version": "1.1.0",
+  "description": "Capture visible areas and complete web pages as images.",
+  "minimum_chrome_version": "120",
+  "permissions": ["activeTab", "tabs", "scripting", "storage", "downloads"],
   "action": {
     "default_popup": "index.html",
     "default_icon": {
@@ -27,11 +21,5 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": ["messages.js"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  }
 }

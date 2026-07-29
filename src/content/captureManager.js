@@ -1,148 +1,159 @@
 import { showCaptureOverlay, hideCaptureOverlay } from "./captureOverlay.js";
-import { analyzePage, calculateSectionViewports } from "./pageAnalyzer.js";
+import { analyzePage, hidePositionedElements } from "./pageAnalyzer.js";
 import { scrollTo, restoreScrollPosition, getScrollPosition, delay } from "./scrollController.js";
-import { sendProgress, sendComplete, sendError, captureTab } from "./messaging.js";
+import { sendProgress, sendComplete, sendError, captureTab, downloadResult } from "./messaging.js";
+import { createScrollPlan, outputDimensions, assertCanvasSize } from "../shared/captureMath.js";
+import { POST_SCROLL_SETTLE_MS } from "../shared/constants.js";
+import { dataUrlSize, formatBytes, formatToDetails, qualityToNumber } from "../shared/helpers.js";
+
+let cancelled = false;
+export function cancelCapture() { cancelled = true; }
+
+function nextFrame() { return new Promise((resolve) => requestAnimationFrame(resolve)); }
+async function settlePage(ms = POST_SCROLL_SETTLE_MS) {
+  await nextFrame();
+  await nextFrame();
+  if (document.fonts?.ready) await Promise.race([document.fonts.ready, delay(1000)]);
+  await delay(ms);
+}
+function checkCancelled() { if (cancelled) throw new Error("Capture cancelled"); }
+
+export async function startCapture({ mode, settings = {} }) {
+  cancelled = false;
+  showCaptureOverlay({ mode });
+  const originalScroll = getScrollPosition();
+  let restoreElements = () => {};
+  try {
+    if (Number(settings.delay) > 0) {
+      sendProgress("analyze", 2, { message: `Waiting ${settings.delay} seconds` });
+      await delay(Number(settings.delay) * 1000);
+    }
+    checkCancelled();
+    restoreElements = hidePositionedElements(settings);
+    const result = mode === "fullpage" ? await captureFullPage(settings) : await captureVisible(settings);
+    sendComplete(result);
+    if (settings.autoDownload) await downloadResult(result, settings);
+    return { success: true, data: result };
+  } catch (error) {
+    sendError(cancelled ? "CAPTURE_CANCELLED" : "CAPTURE_FAILED", error.message, cancelled);
+    return { success: false, error: error.message };
+  } finally {
+    restoreElements();
+    restoreScrollPosition(originalScroll);
+    hideCaptureOverlay();
+  }
+}
+
+async function captureVisible(settings) {
+  sendProgress("capture", 30);
+  await settlePage();
+  checkCancelled();
+  hideOverlayForCapture();
+  const imageData = await captureTab();
+  showOverlayAfterCapture();
+  sendProgress("finalize", 90);
+  const rendered = await convertImage(imageData, settings);
+  return buildResult(rendered.dataUrl, rendered.width, rendered.height, "visible", settings);
+}
+
+async function captureFullPage(settings) {
+  sendProgress("analyze", 5);
+  let page = analyzePage();
+  const positions = createScrollPlan(page.scrollHeight, page.vpHeight);
+  const captures = [];
+  sendProgress("scroll", 10, { currentSection: 0, totalSections: positions.length });
+  for (let index = 0; index < positions.length; index += 1) {
+    checkCancelled();
+    scrollTo(positions[index]);
+    await settlePage();
+    const actualY = getScrollPosition();
+    hideOverlayForCapture();
+    const imageData = await captureTab();
+    showOverlayAfterCapture();
+    captures.push({ imageData, y: actualY });
+    sendProgress("capture", 10 + ((index + 1) / positions.length) * 65, { currentSection: index + 1, totalSections: positions.length });
+  }
+  // A lazy-loaded page may have grown; capture the newly exposed tail once.
+  page = analyzePage();
+  const finalPlan = createScrollPlan(page.scrollHeight, page.vpHeight);
+  const tailY = finalPlan.at(-1);
+  if (tailY > captures.at(-1).y) {
+    scrollTo(tailY);
+    await settlePage();
+    hideOverlayForCapture();
+    captures.push({ imageData: await captureTab(), y: getScrollPosition() });
+    showOverlayAfterCapture();
+  }
+  sendProgress("merge", 78);
+  const rendered = await stitchCaptures(captures, page, settings);
+  sendProgress("finalize", 94);
+  return buildResult(rendered.dataUrl, rendered.width, rendered.height, "fullpage", settings);
+}
 
 function hideOverlayForCapture() {
   const el = document.getElementById("snap-capture-overlay");
   if (el) el.style.display = "none";
 }
-
 function showOverlayAfterCapture() {
   const el = document.getElementById("snap-capture-overlay");
   if (el) el.style.display = "";
 }
 
-function nextFrame() {
-  return new Promise((r) => requestAnimationFrame(r));
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Unable to decode a captured image"));
+    image.src = src;
+  });
 }
 
-export async function startCapture({ mode, settings }) {
-  console.log("[Snap Content] startCapture called", { mode, settings });
-  showCaptureOverlay({ mode });
-
-  const capMode = mode === "fullpage" ? "fullpage" : "visible";
-
-  try {
-    sendProgress("analyze", 5);
-
-    if (capMode === "fullpage") {
-      return await captureFullPage(settings);
-    }
-
-    return await captureVisible(settings);
-  } catch (err) {
-    hideCaptureOverlay();
-    sendError("CAPTURE_FAILED", err.message, true);
-    return { success: false, error: err.message };
+async function stitchCaptures(captures, page, settings) {
+  if (!captures.length) throw new Error("No images were captured");
+  const first = await loadImage(captures[0].imageData);
+  const scaleX = first.naturalWidth / page.vpWidth;
+  const scaleY = first.naturalHeight / page.vpHeight;
+  const dimensions = outputDimensions(page.vpWidth, page.scrollHeight, scaleX, scaleY);
+  assertCanvasSize(dimensions);
+  const canvas = document.createElement("canvas");
+  canvas.width = dimensions.width;
+  canvas.height = dimensions.height;
+  const context = canvas.getContext("2d", { alpha: false });
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  for (let index = 0; index < captures.length; index += 1) {
+    const image = index === 0 ? first : await loadImage(captures[index].imageData);
+    const y = Math.round(captures[index].y * scaleY);
+    context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, y, canvas.width, image.naturalHeight);
   }
+  return exportCanvas(canvas, settings);
 }
 
-async function captureFullPage(settings) {
-  const pageInfo = analyzePage();
-  const sections = calculateSectionViewports(pageInfo.totalSections, pageInfo.vpHeight);
-  const totalSections = sections.length;
-
-  const origScroll = getScrollPosition();
-  sendProgress("scroll", 10, { currentSection: 0, totalSections });
-
-  const captures = [];
-
-  for (const section of sections) {
-    scrollTo(section.y);
-    await delay(300);
-
-    sendProgress("capture", 10 + ((section.index + 1) / totalSections) * 60, {
-      currentSection: section.index + 1,
-      totalSections,
-    });
-
-    hideOverlayForCapture();
-    await nextFrame();
-    const imageData = await captureTab();
-    showOverlayAfterCapture();
-    captures.push(imageData);
-  }
-
-  sendProgress("merge", 75);
-
-  const merged = await stitchCaptures(captures, pageInfo.vpHeight);
-  if (!merged) throw new Error("Failed to stitch captures");
-
-  restoreScrollPosition(origScroll);
-  sendProgress("finalize", 90);
-
-  hideCaptureOverlay();
-  sendComplete(buildResult(merged, "fullpage", settings));
-
-  return { success: true, data: buildResult(merged, "fullpage", settings) };
+async function convertImage(dataUrl, settings) {
+  const image = await loadImage(dataUrl);
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth;
+  canvas.height = image.naturalHeight;
+  canvas.getContext("2d").drawImage(image, 0, 0);
+  return exportCanvas(canvas, settings);
 }
 
-async function captureVisible(settings) {
-  sendProgress("capture", 30);
-
-  hideOverlayForCapture();
-  await nextFrame();
-  const imageData = await captureTab();
-  showOverlayAfterCapture();
-
-  sendProgress("finalize", 80);
-
-  hideCaptureOverlay();
-  sendComplete(buildResult(imageData, "visible", settings));
-
-  return { success: true, data: buildResult(imageData, "visible", settings) };
+function exportCanvas(canvas, settings) {
+  const { mime } = formatToDetails(settings.format);
+  return { dataUrl: canvas.toDataURL(mime, qualityToNumber(settings.quality)), width: canvas.width, height: canvas.height };
 }
 
-function buildResult(imageData, mode, settings) {
-  const now = new Date();
+function buildResult(imageData, width, height, mode, settings) {
   return {
     imageData,
-    dimensions: mode === "fullpage"
-      ? "Full page"
-      : `${window.innerWidth} × ${window.innerHeight}`,
-    format: settings?.format || "PNG",
-    size: formatSize(dataUrlSize(imageData)),
-    capturedAt: now.toISOString(),
-    source: document.title || new URL(location.href).hostname,
+    dimensions: `${width} × ${height}`,
+    format: formatToDetails(settings.format).extension.toUpperCase(),
+    size: formatBytes(dataUrlSize(imageData)),
+    capturedAt: new Date().toISOString(),
+    source: document.title || location.hostname,
+    title: document.title || "page",
+    domain: location.hostname,
+    mode,
+    settings: { format: settings.format, location: settings.location, namingPattern: settings.namingPattern },
   };
-}
-
-async function stitchCaptures(captures, _vpHeight) {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-
-  const images = [];
-  for (const src of captures) {
-    const img = await new Promise((resolve, reject) => {
-      const i = new Image();
-      i.onload = () => resolve(i);
-      i.onerror = reject;
-      i.src = src;
-    });
-    images.push(img);
-  }
-
-  const sectionH = images[0].naturalHeight;
-  const sectionW = images[0].naturalWidth;
-
-  canvas.width = sectionW;
-  canvas.height = sectionH * images.length;
-
-  for (let i = 0; i < images.length; i++) {
-    ctx.drawImage(images[i], 0, i * sectionH);
-  }
-
-  return canvas.toDataURL("image/png");
-}
-
-function dataUrlSize(dataUrl) {
-  const raw = dataUrl.split(",")[1] || "";
-  return Math.round((raw.length * 3) / 4);
-}
-
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + " B";
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }

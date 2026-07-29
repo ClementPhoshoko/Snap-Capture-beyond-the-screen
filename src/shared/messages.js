@@ -18,6 +18,9 @@ export const MessageType = Object.freeze({
   CAPTURE_COMPLETE: "SNAP/CAPTURE_COMPLETE",
   CAPTURE_ERROR: "SNAP/CAPTURE_ERROR",
   CAPTURE_TAB: "SNAP/CAPTURE_TAB",
+  PING: "SNAP/PING",
+  CANCEL_CAPTURE: "SNAP/CANCEL_CAPTURE",
+  DOWNLOAD_RESULT: "SNAP/DOWNLOAD_RESULT",
 });
 
 // ─── Payload builders ────────────────────────────────────────
@@ -41,6 +44,10 @@ export function buildStartCapture(mode, settings = {}) {
 
 export function buildCaptureTab() {
   return { type: MessageType.CAPTURE_TAB };
+}
+
+export function buildCancelCapture() {
+  return { type: MessageType.CANCEL_CAPTURE, payload: {} };
 }
 
 /**

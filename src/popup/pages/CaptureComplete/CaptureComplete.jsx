@@ -5,6 +5,7 @@ import ScreenshotPreviewCard from "../../components/ScreenshotPreviewCard";
 import MetadataPanel from "../../components/MetadataPanel";
 import ActionCard from "../../components/ActionCard";
 import styles from "./CaptureComplete.module.css";
+import { makeFilename } from "../../../shared/helpers";
 
 const pageVariants = {
   hidden: { opacity: 0, y: 12 },
@@ -56,10 +57,11 @@ export default function CaptureCompleteScreen({ onBack, onClose, captureResult }
 
   const handleDownload = () => {
     if (!imageData) return;
-    const ts = new Date().toISOString().replace(/[:.]/g, "-");
     chrome.downloads.download({
       url: imageData,
-      filename: `snap-${ts}.png`,
+      filename: makeFilename(result.settings?.namingPattern, result.title, result.settings?.format),
+      saveAs: result.settings?.location === "ask",
+      conflictAction: "uniquify",
     });
   };
 
@@ -68,13 +70,9 @@ export default function CaptureCompleteScreen({ onBack, onClose, captureResult }
     try {
       const blob = dataUrlToBlob(imageData);
       await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-    } catch {
-      const textarea = document.createElement("textarea");
-      textarea.value = imageData;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
+    } catch (error) {
+      console.error("Image clipboard write failed", error);
+      alert("Your browser blocked copying the image. Please use Download instead.");
     }
   };
 

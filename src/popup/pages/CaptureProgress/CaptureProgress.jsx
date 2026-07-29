@@ -18,6 +18,7 @@ import CapturePipeline from "../../components/CapturePipeline";
 import CaptureStats from "../../components/CaptureStats";
 import {
   buildStartCapture,
+  buildCancelCapture,
   sendToBackground,
   onMessage,
   offMessage,
@@ -70,6 +71,11 @@ export default function CaptureProgressScreen({ params, onBack, onClose, onCompl
   const [pipelineItems, setPipelineItems] = useState(PIPELINE_ITEMS);
   const [stats, setStats] = useState(null);
   const startedRef = useRef(false);
+
+  const cancelAndClose = () => {
+    sendToBackground(buildCancelCapture()).catch(() => {});
+    onClose?.();
+  };
 
   const handleMessage = useCallback((message, sender) => {
     if (sender?.tab) return;
@@ -156,7 +162,7 @@ export default function CaptureProgressScreen({ params, onBack, onClose, onCompl
         transition={{ duration: 0.25 }}
       >
         <div className={styles.header}>
-          <button className={styles.headerBtn} onClick={onBack} aria-label="Go back">
+          <button className={styles.headerBtn} onClick={cancelAndClose} aria-label="Cancel capture">
             <ArrowLeft size={18} />
           </button>
           <div className={styles.headerCenter}>
@@ -173,7 +179,7 @@ export default function CaptureProgressScreen({ params, onBack, onClose, onCompl
               <span className={styles.headerSubtitle}>Capture beyond the screen.</span>
             </div>
           </div>
-          <button className={styles.headerBtn} onClick={onClose} aria-label="Close">
+          <button className={styles.headerBtn} onClick={cancelAndClose} aria-label="Cancel capture">
             <X size={18} />
           </button>
         </div>
@@ -186,7 +192,7 @@ export default function CaptureProgressScreen({ params, onBack, onClose, onCompl
             className={styles.retryBtn}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={onBack}
+            onClick={cancelAndClose}
           >
             Try Again
           </motion.button>
@@ -204,7 +210,7 @@ export default function CaptureProgressScreen({ params, onBack, onClose, onCompl
       transition={{ duration: 0.25 }}
     >
       <div className={styles.header}>
-        <button className={styles.headerBtn} onClick={onBack} aria-label="Go back">
+        <button className={styles.headerBtn} onClick={cancelAndClose} aria-label="Cancel capture">
           <ArrowLeft size={18} />
         </button>
         <div className={styles.headerCenter}>
@@ -221,7 +227,7 @@ export default function CaptureProgressScreen({ params, onBack, onClose, onCompl
             <span className={styles.headerSubtitle}>Capture beyond the screen.</span>
           </div>
         </div>
-        <button className={styles.headerBtn} onClick={onClose} aria-label="Close">
+        <button className={styles.headerBtn} onClick={cancelAndClose} aria-label="Cancel capture">
           <X size={18} />
         </button>
       </div>

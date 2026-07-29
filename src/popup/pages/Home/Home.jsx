@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Header from "../../components/Header";
 import CurrentTabCard from "../../components/CurrentTabCard";
@@ -25,13 +25,13 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export default function Home({ onStartCapture, onSettingsClick }) {
+export default function Home({ onStartCapture, onSettingsClick, settings, onSettingsChange }) {
   const [captureMode, setCaptureMode] = useState("fullpage");
-  const [settings, setSettings] = useState({
-    format: "png",
-    location: "downloads",
-    autoDownload: true,
-  });
+  const [tab, setTab] = useState(null);
+
+  useEffect(() => {
+    chrome.tabs.query({ active: true, currentWindow: true }).then(([activeTab]) => setTab(activeTab)).catch(() => {});
+  }, []);
 
   const handleCapture = () => {
     onStartCapture?.({ mode: captureMode, settings });
@@ -50,8 +50,9 @@ export default function Home({ onStartCapture, onSettingsClick }) {
 
       <motion.div className={styles.content} variants={itemVariants}>
         <CurrentTabCard
-          title="Getting Started — AkovoLabs"
-          url="https://akovolabs.dev/docs"
+          title={tab?.title}
+          url={tab?.url}
+          favicon={tab?.favIconUrl}
         />
       </motion.div>
 
@@ -60,7 +61,7 @@ export default function Home({ onStartCapture, onSettingsClick }) {
       </motion.div>
 
       <motion.div className={styles.content} variants={itemVariants}>
-        <QuickSettings settings={settings} onChange={setSettings} />
+        <QuickSettings settings={settings} onChange={onSettingsChange} />
       </motion.div>
 
       <motion.div className={styles.content} variants={itemVariants}>

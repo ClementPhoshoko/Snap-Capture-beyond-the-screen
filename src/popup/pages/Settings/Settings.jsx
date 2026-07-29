@@ -47,16 +47,8 @@ const namingOptions = [
   { value: "Snap_{date}", label: "Snap_date" },
 ];
 
-export default function Settings({ onBack, onClose, theme, accent, onThemeChange, onAccentChange }) {
-  const [settings, setSettings] = useState({
-    quality: "high",
-    delay: "0",
-    hideFixed: false,
-    ignoreSticky: false,
-    namingPattern: "Snap_{date}-{time}",
-  });
-
-  const update = (key, value) => setSettings((s) => ({ ...s, [key]: value }));
+export default function Settings({ onBack, onClose, theme, accent, onThemeChange, onAccentChange, settings, onSettingsChange, onResetSettings }) {
+  const update = (key, value) => onSettingsChange({ ...settings, [key]: value });
 
   return (
     <motion.div
@@ -228,7 +220,7 @@ export default function Settings({ onBack, onClose, theme, accent, onThemeChange
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ duration: 0.12 }}
-                onClick={() => {}}
+                onClick={onResetSettings}
                 aria-label="Reset settings"
               >
                 Reset

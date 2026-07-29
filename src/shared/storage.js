@@ -1,1 +1,36 @@
-export const storage = {};
+import { DEFAULT_SETTINGS } from "./constants.js";
+
+const SETTINGS_KEY = "settings";
+const HISTORY_KEY = "captureHistory";
+
+export async function getSettings() {
+  const stored = await chrome.storage.local.get(SETTINGS_KEY);
+  return { ...DEFAULT_SETTINGS, ...(stored[SETTINGS_KEY] || {}) };
+}
+
+export async function saveSettings(settings) {
+  const next = { ...DEFAULT_SETTINGS, ...settings };
+  await chrome.storage.local.set({ [SETTINGS_KEY]: next });
+  return next;
+}
+
+export async function resetSettings() {
+  await chrome.storage.local.remove(SETTINGS_KEY);
+  return { ...DEFAULT_SETTINGS };
+}
+
+export async function getCaptureHistory() {
+  const stored = await chrome.storage.local.get(HISTORY_KEY);
+  return stored[HISTORY_KEY] || [];
+}
+
+// Keep metadata only: screenshots are too large for extension storage quotas.
+export async function recordCapture(result) {
+  const entries = await getCaptureHistory();
+  const entry = {
+    id: crypto.randomUUID(), title: result.title || result.source, domain: result.domain || "",
+    resolution: result.dimensions, format: result.format, size: result.size, capturedAt: result.capturedAt,
+  };
+  await chrome.storage.local.set({ [HISTORY_KEY]: [entry, ...entries].slice(0, 50) });
+  return entry;
+}
