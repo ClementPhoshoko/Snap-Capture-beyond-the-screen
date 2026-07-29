@@ -24,6 +24,11 @@ export async function getCaptureHistory() {
   return stored[HISTORY_KEY] || [];
 }
 
+export async function deleteCaptureEntry(id) {
+  const entries = await getCaptureHistory();
+  await chrome.storage.local.set({ [HISTORY_KEY]: entries.filter((e) => e.id !== id) });
+}
+
 export async function recordCapture(result) {
   const entries = await getCaptureHistory();
   const entry = {
