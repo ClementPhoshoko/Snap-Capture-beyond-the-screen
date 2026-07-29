@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import styles from "./ScreenshotPreviewCard.module.css";
 
 export default function ScreenshotPreviewCard({ imageUrl, dimensions }) {
-  const [zoom, setZoom] = useState(41);
+  const [zoom, setZoom] = useState(100);
 
-  const zoomIn = () => setZoom((z) => Math.min(z + 10, 200));
+  useEffect(() => {
+    setZoom(100);
+  }, [imageUrl]);
+
+  const zoomIn = () => setZoom((z) => Math.min(z + 10, 300));
   const zoomOut = () => setZoom((z) => Math.max(z - 10, 10));
 
   return (
