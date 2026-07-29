@@ -17,6 +17,8 @@ export const DEFAULT_SETTINGS = Object.freeze({
   location: "downloads",
   autoDownload: false,
   namingPattern: "Snap_{title}-{date}-{time}",
+  theme: "dark",
+  accent: "purple",
 });
 
 export const FORMAT_DETAILS = Object.freeze({

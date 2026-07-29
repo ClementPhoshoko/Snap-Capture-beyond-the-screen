@@ -27,8 +27,6 @@ function hexToRgba(hex, alpha) {
 function App() {
   const [page, setPage] = useState("home");
   const [prevPage, setPrevPage] = useState(null);
-  const [theme, setTheme] = useState("dark");
-  const [accent, setAccent] = useState("purple");
   const [captureParams, setCaptureParams] = useState(null);
   const [captureResult, setCaptureResult] = useState(null);
   const [captureSettings, setCaptureSettings] = useState(DEFAULT_SETTINGS);
@@ -43,18 +41,18 @@ function App() {
   };
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+    document.documentElement.dataset.theme = captureSettings.theme;
+  }, [captureSettings.theme]);
 
   useEffect(() => {
-    const acc = accentValues[accent] || accentValues.purple;
+    const acc = accentValues[captureSettings.accent] || accentValues.purple;
     const root = document.documentElement;
     root.style.setProperty("--brand-primary", acc.primary);
     root.style.setProperty("--brand-primary-light", acc.light);
     root.style.setProperty("--brand-primary-dark", acc.dark);
     root.style.setProperty("--glass-border-focus", hexToRgba(acc.primary, 0.5));
     root.style.setProperty("--text-accent", acc.light);
-  }, [accent]);
+  }, [captureSettings.accent]);
 
   const navMap = {
     home: "home",
@@ -113,10 +111,10 @@ function App() {
             key="settings"
             onBack={() => setPage("home")}
             onClose={() => setPage("home")}
-            theme={theme}
-            accent={accent}
-            onThemeChange={setTheme}
-            onAccentChange={setAccent}
+            theme={captureSettings.theme}
+            accent={captureSettings.accent}
+            onThemeChange={(t) => updateCaptureSettings({ ...captureSettings, theme: t })}
+            onAccentChange={(a) => updateCaptureSettings({ ...captureSettings, accent: a })}
             settings={captureSettings}
             onSettingsChange={updateCaptureSettings}
             onResetSettings={async () => updateCaptureSettings(await resetSettings())}
