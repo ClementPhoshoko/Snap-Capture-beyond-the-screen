@@ -72,8 +72,6 @@ function getOverlayCSS() {
   position: absolute;
   inset: 0;
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur-xl));
-  -webkit-backdrop-filter: blur(var(--glass-blur-xl));
 }
 
 .snap-corners {
@@ -84,9 +82,9 @@ function getOverlayCSS() {
 
 .snap-corner {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  border-color: var(--glass-border);
+  width: 36px;
+  height: 36px;
+  border-color: var(--glass-border-strong);
   border-style: solid;
   border-width: 0;
   opacity: 0;
@@ -106,8 +104,8 @@ function getOverlayCSS() {
 .snap-corner-tl {
   top: 0;
   left: 0;
-  border-top-width: 2px;
-  border-left-width: 2px;
+  border-top-width: 3px;
+  border-left-width: 3px;
   transition-delay: 0s;
 }
 
@@ -119,8 +117,8 @@ function getOverlayCSS() {
 .snap-corner-tr {
   top: 0;
   right: 0;
-  border-top-width: 2px;
-  border-right-width: 2px;
+  border-top-width: 3px;
+  border-right-width: 3px;
   transition-delay: 0.1s;
 }
 
@@ -132,8 +130,8 @@ function getOverlayCSS() {
 .snap-corner-br {
   bottom: 0;
   right: 0;
-  border-bottom-width: 2px;
-  border-right-width: 2px;
+  border-bottom-width: 3px;
+  border-right-width: 3px;
   transition-delay: 0.2s;
 }
 
@@ -145,8 +143,8 @@ function getOverlayCSS() {
 .snap-corner-bl {
   bottom: 0;
   left: 0;
-  border-bottom-width: 2px;
-  border-left-width: 2px;
+  border-bottom-width: 3px;
+  border-left-width: 3px;
   transition-delay: 0.3s;
 }
 

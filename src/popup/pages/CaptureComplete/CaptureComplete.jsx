@@ -26,11 +26,11 @@ const itemVariants = {
 
 const defaultResult = {
   imageUrl: null,
-  dimensions: "18,420 × 1,280 px",
+  dimensions: "—",
   format: "PNG",
-  size: "4.2 MB",
+  size: "—",
   capturedAt: new Date().toLocaleString(),
-  source: "akovo.dev — Getting Started",
+  source: "—",
 };
 
 const metadataItems = (result) => [
@@ -41,8 +41,47 @@ const metadataItems = (result) => [
   { label: "Source", value: result.source, icon: Monitor },
 ];
 
+function dataUrlToBlob(dataUrl) {
+  const parts = dataUrl.split(",");
+  const mime = parts[0].match(/:(.*?);/)?.[1] || "image/png";
+  const bytes = atob(parts[1]);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
 export default function CaptureCompleteScreen({ onBack, onClose, captureResult }) {
-  const result = { ...defaultResult, ...captureResult };
+  const imageData = captureResult?.imageData;
+  const result = { ...defaultResult, ...captureResult, imageUrl: imageData ?? defaultResult.imageUrl };
+
+  const handleDownload = () => {
+    if (!imageData) return;
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    chrome.downloads.download({
+      url: imageData,
+      filename: `snap-${ts}.png`,
+    });
+  };
+
+  const handleCopy = async () => {
+    if (!imageData) return;
+    try {
+      const blob = dataUrlToBlob(imageData);
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = imageData;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+  };
+
+  const handleOpenTab = () => {
+    if (!imageData) return;
+    window.open(imageData, "_blank");
+  };
 
   return (
     <motion.div
@@ -88,15 +127,15 @@ export default function CaptureCompleteScreen({ onBack, onClose, captureResult }
 
       <motion.div className={styles.content} variants={itemVariants}>
         <div className={styles.actions}>
-          <ActionCard icon={Download} label="Download" onClick={() => {}} variant="primary" />
-          <ActionCard icon={Clipboard} label="Copy" onClick={() => {}} />
+          <ActionCard icon={Download} label="Download" onClick={handleDownload} variant="primary" />
+          <ActionCard icon={Clipboard} label="Copy" onClick={handleCopy} />
           <ActionCard icon={Camera} label="New" onClick={onBack} />
         </div>
       </motion.div>
 
       <motion.div className={styles.content} variants={itemVariants}>
         <div className={styles.footer}>
-          <button className={styles.externalBtn} onClick={() => {}}>
+          <button className={styles.externalBtn} onClick={handleOpenTab}>
             <ExternalLink size={14} />
             <span>Open in New Tab</span>
           </button>

@@ -34,7 +34,7 @@ export default function Home({ onStartCapture, onSettingsClick }) {
   });
 
   const handleCapture = () => {
-    onStartCapture?.();
+    onStartCapture?.({ mode: captureMode, settings });
   };
 
   return (

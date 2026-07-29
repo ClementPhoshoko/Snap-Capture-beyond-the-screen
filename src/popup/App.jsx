@@ -27,6 +27,8 @@ function App() {
   const [prevPage, setPrevPage] = useState(null);
   const [theme, setTheme] = useState("dark");
   const [accent, setAccent] = useState("purple");
+  const [captureParams, setCaptureParams] = useState(null);
+  const [captureResult, setCaptureResult] = useState(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -64,21 +66,29 @@ function App() {
         {page === "home" && (
           <Home
             key="home"
-            onStartCapture={() => setPage("capture")}
+            onStartCapture={(params) => {
+              setCaptureParams(params);
+              setPage("capture");
+            }}
             onSettingsClick={() => setPage("settings")}
           />
         )}
         {page === "capture" && (
           <CaptureProgress
             key="capture"
+            params={captureParams}
             onBack={() => setPage("home")}
             onClose={() => setPage("home")}
-            onComplete={() => setPage("complete")}
+            onComplete={(result) => {
+              setCaptureResult(result);
+              setPage("complete");
+            }}
           />
         )}
         {page === "complete" && (
           <CaptureComplete
             key="complete"
+            captureResult={captureResult}
             onBack={() => setPage("capture")}
             onClose={() => setPage("home")}
           />
