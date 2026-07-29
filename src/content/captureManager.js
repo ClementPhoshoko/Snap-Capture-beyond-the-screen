@@ -126,23 +126,18 @@ async function captureFullPage(settings) {
   }
 }
 
-function hideOverlayForCapture() {
-  const el = document.getElementById("snap-capture-overlay");
-  if (el) el.style.display = "none";
-}
-function showOverlayAfterCapture() {
-  const el = document.getElementById("snap-capture-overlay");
-  if (el) el.style.display = "";
-}
-
 async function captureWithoutOverlay() {
-  hideOverlayForCapture();
-  // Let the browser paint the hidden state before Chrome snapshots the tab.
+  const overlay = document.getElementById("snap-capture-overlay");
+  if (overlay) {
+    overlay.style.setProperty("display", "none", "important");
+    overlay.offsetHeight;
+  }
+  await nextFrame();
   await nextFrame();
   try {
     return await captureTab();
   } finally {
-    showOverlayAfterCapture();
+    if (overlay) overlay.style.display = "";
   }
 }
 
