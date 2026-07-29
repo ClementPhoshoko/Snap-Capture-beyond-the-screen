@@ -34,7 +34,7 @@ export default function History({ onClose }) {
           <div className={styles.content}><div className={styles.searchWrap}><Search size={14} className={styles.searchIcon} /><input className={styles.searchInput} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search captures..." /></div></div>
           <div className={styles.content}>
             <h3 className={styles.sectionTitle}>{visible.length ? "Recent" : "No matches"}</h3>
-            {visible.length > 0 && <GlassCard className={styles.card}>{visible.map((item, index) => <div key={item.id}>{index > 0 && <div className={styles.divider} />}<HistoryCard {...item} time={new Date(item.capturedAt).toLocaleString()} /></div>)}</GlassCard>}
+            {visible.length > 0 && <GlassCard className={styles.card}>{visible.map((item, index) => <div key={item.id}>{index > 0 && <div className={styles.divider} />}<HistoryCard {...item} time={new Date(item.capturedAt).toLocaleString()} onOpen={() => item.url && chrome.tabs.create({ url: item.url })} /></div>)}</GlassCard>}
           </div>
         </div>
       ) : (

@@ -24,12 +24,19 @@ export async function getCaptureHistory() {
   return stored[HISTORY_KEY] || [];
 }
 
-// Keep metadata only: screenshots are too large for extension storage quotas.
 export async function recordCapture(result) {
   const entries = await getCaptureHistory();
   const entry = {
-    id: crypto.randomUUID(), title: result.title || result.source, domain: result.domain || "",
-    resolution: result.dimensions, format: result.format, size: result.size, capturedAt: result.capturedAt,
+    id: crypto.randomUUID(),
+    title: result.title || result.source,
+    domain: result.domain || "",
+    url: result.url || "",
+    favicon: result.favicon || "",
+    thumbnail: result.thumbnail || "",
+    resolution: result.dimensions,
+    format: result.format,
+    size: result.size,
+    capturedAt: result.capturedAt,
   };
   await chrome.storage.local.set({ [HISTORY_KEY]: [entry, ...entries].slice(0, 50) });
   return entry;

@@ -186,6 +186,7 @@ function exportCanvas(canvas, settings) {
 }
 
 function buildResult(imageData, width, height, mode, settings) {
+  const faviconEl = document.querySelector("link[rel*='icon']");
   return {
     imageData,
     dimensions: `${width} × ${height}`,
@@ -195,6 +196,8 @@ function buildResult(imageData, width, height, mode, settings) {
     source: document.title || location.hostname,
     title: document.title || "page",
     domain: location.hostname,
+    url: location.href,
+    favicon: faviconEl?.href || `${location.origin}/favicon.ico`,
     mode,
     settings: { format: settings.format, location: settings.location, namingPattern: settings.namingPattern },
   };

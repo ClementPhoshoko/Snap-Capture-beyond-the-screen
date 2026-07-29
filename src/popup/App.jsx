@@ -24,6 +24,25 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function generateThumbnail(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX_W = 200;
+      const scale = Math.min(1, MAX_W / img.naturalWidth);
+      const w = Math.round(img.naturalWidth * scale);
+      const h = Math.round(img.naturalHeight * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.5));
+    };
+    img.onerror = () => resolve("");
+    img.src = dataUrl;
+  });
+}
+
 function App() {
   const [page, setPage] = useState("home");
   const [prevPage, setPrevPage] = useState(null);
@@ -91,9 +110,10 @@ function App() {
             params={captureParams}
             onBack={() => setPage("home")}
             onClose={() => setPage("home")}
-            onComplete={(result) => {
+            onComplete={async (result) => {
               setCaptureResult(result);
-              recordCapture(result).catch(() => {});
+              const thumbnail = await generateThumbnail(result.imageData);
+              recordCapture({ ...result, thumbnail }).catch(() => {});
               setPage("complete");
             }}
           />

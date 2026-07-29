@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Download, Copy, MoreHorizontal, Monitor, Globe } from "lucide-react";
+import { ExternalLink, Monitor, Globe } from "lucide-react";
 import styles from "./HistoryCard.module.css";
 
 export default function HistoryCard({
@@ -12,9 +12,7 @@ export default function HistoryCard({
   format,
   size,
   time,
-  onDownload,
-  onCopy,
-  onMore,
+  onOpen,
 }) {
   return (
     <div className={styles.card}>
@@ -50,30 +48,10 @@ export default function HistoryCard({
           whileHover={{ scale: 1.1, y: -1 }}
           whileTap={{ scale: 0.95 }}
           transition={{ duration: 0.12 }}
-          onClick={(e) => { e.stopPropagation(); onDownload?.(e); }}
-          aria-label="Download"
+          onClick={(e) => { e.stopPropagation(); onOpen?.(e); }}
+          aria-label="Open original page"
         >
-          <Download size={14} />
-        </motion.button>
-        <motion.button
-          className={styles.actionBtn}
-          whileHover={{ scale: 1.1, y: -1 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.12 }}
-          onClick={(e) => { e.stopPropagation(); onCopy?.(e); }}
-          aria-label="Copy"
-        >
-          <Copy size={14} />
-        </motion.button>
-        <motion.button
-          className={styles.actionBtn}
-          whileHover={{ scale: 1.1, y: -1 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ duration: 0.12 }}
-          onClick={(e) => { e.stopPropagation(); onMore?.(e); }}
-          aria-label="More"
-        >
-          <MoreHorizontal size={14} />
+          <ExternalLink size={14} />
         </motion.button>
       </div>
     </div>
