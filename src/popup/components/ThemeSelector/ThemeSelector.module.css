@@ -1,0 +1,51 @@
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+}
+
+.option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-tertiary);
+  transition: color var(--duration-fast) var(--ease-default);
+  min-width: 48px;
+  outline: none;
+}
+
+.option:focus-visible {
+  outline: 2px solid var(--glass-border-focus);
+  outline-offset: 2px;
+}
+
+.selected {
+  color: var(--text-primary);
+}
+
+.indicator {
+  position: absolute;
+  inset: 0;
+  background: var(--glass-bg-active);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--glass-shadow-sm);
+  z-index: 0;
+}
+
+.label {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}

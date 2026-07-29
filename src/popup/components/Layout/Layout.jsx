@@ -1,14 +1,11 @@
-import { useState } from "react";
 import BottomNav from "../BottomNav";
 import styles from "./Layout.module.css";
 
-export default function Layout({ children }) {
-  const [nav, setNav] = useState("home");
-
+export default function Layout({ children, navPage = "home", onNavChange }) {
   return (
     <div className={styles.layout}>
       <div className={styles.page}>{children}</div>
-      <BottomNav active={nav} onChange={setNav} />
+      <BottomNav active={navPage} onChange={onNavChange} />
     </div>
   );
 }

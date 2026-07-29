@@ -46,7 +46,7 @@
 }
 
 .iconBoxActive {
-  color: var(--brand-primary);
+  color: var(--brand-primary-light);
 }
 
 .text {
@@ -68,7 +68,7 @@
 }
 
 .titleActive {
-  color: var(--brand-primary);
+  color: var(--brand-primary-light);
 }
 
 .description {

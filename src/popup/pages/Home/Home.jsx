@@ -25,7 +25,7 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export default function Home({ onStartCapture }) {
+export default function Home({ onStartCapture, onSettingsClick }) {
   const [captureMode, setCaptureMode] = useState("fullpage");
   const [settings, setSettings] = useState({
     format: "png",
@@ -45,7 +45,7 @@ export default function Home({ onStartCapture }) {
       animate="visible"
     >
       <motion.div className={styles.content} variants={itemVariants}>
-        <Header />
+        <Header onSettingsClick={onSettingsClick} />
       </motion.div>
 
       <motion.div className={styles.content} variants={itemVariants}>

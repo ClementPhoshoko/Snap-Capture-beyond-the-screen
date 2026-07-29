@@ -3,6 +3,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-1);
   background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
   backdrop-filter: blur(var(--glass-blur-md));

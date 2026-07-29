@@ -6,6 +6,24 @@ import MetadataPanel from "../../components/MetadataPanel";
 import ActionCard from "../../components/ActionCard";
 import styles from "./CaptureComplete.module.css";
 
+const pageVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.2,
+      ease: [0.4, 0, 0.2, 1],
+      staggerChildren: 0.04,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0 },
+};
+
 const defaultResult = {
   imageUrl: null,
   dimensions: "18,420 × 1,280 px",
@@ -29,57 +47,61 @@ export default function CaptureCompleteScreen({ onBack, onClose, captureResult }
   return (
     <motion.div
       className={styles.screen}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
     >
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerCenter}>
-          <div className={styles.logo}>
-            <img
-              src={new URL("../../assets/Snap Logo.png", import.meta.url).href}
-              alt="AkovoLabs Snap"
-              className={styles.logoImg}
-              draggable={false}
-            />
+      <motion.div className={styles.content} variants={itemVariants}>
+        <div className={styles.header}>
+          <div className={styles.headerCenter}>
+            <div className={styles.logo}>
+              <img
+                src={new URL("../../assets/Snap Logo.png", import.meta.url).href}
+                alt="AkovoLabs Snap"
+                className={styles.logoImg}
+                draggable={false}
+              />
+            </div>
+            <div className={styles.headerText}>
+              <span className={styles.headerTitle}>AkovoLabs <span className={styles.accent}>Snap</span></span>
+              <span className={styles.headerSubtitle}>Capture beyond the screen.</span>
+            </div>
           </div>
-          <div className={styles.headerText}>
-            <span className={styles.headerTitle}>AkovoLabs Snap</span>
-            <span className={styles.headerSubtitle}>Capture beyond the screen.</span>
-          </div>
+          <button className={styles.headerBtn} onClick={onClose} aria-label="Close">
+            <X size={18} />
+          </button>
         </div>
-        <button className={styles.headerBtn} onClick={onClose} aria-label="Close">
-          <X size={18} />
-        </button>
-      </div>
+      </motion.div>
 
-      {/* Success Banner */}
-      <div className={styles.divider} />
-      <SuccessBanner />
-      <div className={styles.divider} />
+      <motion.div className={styles.content} variants={itemVariants}>
+        <div className={styles.divider} />
+        <SuccessBanner />
+        <div className={styles.divider} />
+      </motion.div>
 
-      {/* Preview + Metadata */}
-      <div className={styles.contentGrid}>
-        <ScreenshotPreviewCard imageUrl={result.imageUrl} dimensions={result.dimensions} />
-        <MetadataPanel items={metadataItems(result)} />
-      </div>
+      <motion.div className={styles.content} variants={itemVariants}>
+        <div className={styles.contentGrid}>
+          <ScreenshotPreviewCard imageUrl={result.imageUrl} dimensions={result.dimensions} />
+          <MetadataPanel items={metadataItems(result)} />
+        </div>
+      </motion.div>
 
-      {/* Action Cards */}
-      <div className={styles.actions}>
-        <ActionCard icon={Download} label="Download" onClick={() => {}} variant="primary" />
-        <ActionCard icon={Clipboard} label="Copy" onClick={() => {}} />
-        <ActionCard icon={Camera} label="New" onClick={onBack} />
-      </div>
+      <motion.div className={styles.content} variants={itemVariants}>
+        <div className={styles.actions}>
+          <ActionCard icon={Download} label="Download" onClick={() => {}} variant="primary" />
+          <ActionCard icon={Clipboard} label="Copy" onClick={() => {}} />
+          <ActionCard icon={Camera} label="New" onClick={onBack} />
+        </div>
+      </motion.div>
 
-      {/* Footer */}
-      <div className={styles.footer}>
-        <button className={styles.externalBtn} onClick={() => {}}>
-          <ExternalLink size={14} />
-          <span>Open in New Tab</span>
-        </button>
-      </div>
+      <motion.div className={styles.content} variants={itemVariants}>
+        <div className={styles.footer}>
+          <button className={styles.externalBtn} onClick={() => {}}>
+            <ExternalLink size={14} />
+            <span>Open in New Tab</span>
+          </button>
+        </div>
+      </motion.div>
     </motion.div>
   );
 }

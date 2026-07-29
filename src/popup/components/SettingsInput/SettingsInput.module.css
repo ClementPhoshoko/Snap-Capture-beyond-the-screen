@@ -1,0 +1,57 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.input {
+  width: 130px;
+  padding: var(--space-1) var(--space-2);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-mono);
+  outline: none;
+  transition:
+    background var(--duration-fast) var(--ease-default),
+    border-color var(--duration-fast) var(--ease-default);
+}
+
+.input:focus {
+  background: var(--input-bg-focus);
+  border-color: var(--input-border-focus);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.copyBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-xs);
+  background: var(--interactive-bg);
+  border: 1px solid var(--interactive-border);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background var(--duration-fast) var(--ease-default),
+    color var(--duration-fast) var(--ease-default);
+}
+
+.copyBtn:hover {
+  background: var(--interactive-bg-hover);
+  color: var(--text-primary);
+}
+
+.copyBtn:focus-visible {
+  outline: 2px solid var(--glass-border-focus);
+  outline-offset: 1px;
+}

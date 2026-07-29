@@ -79,6 +79,10 @@
   line-height: var(--line-height-tight);
 }
 
+.headerTitle .accent {
+  color: var(--brand-primary-light);
+}
+
 .headerSubtitle {
   font-size: var(--font-size-2xs);
   color: var(--text-tertiary);
@@ -170,6 +174,7 @@
 /* Glass Card */
 .glassCard {
   background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
   backdrop-filter: blur(var(--glass-blur-md));

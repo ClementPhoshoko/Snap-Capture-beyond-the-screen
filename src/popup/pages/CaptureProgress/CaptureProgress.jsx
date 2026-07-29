@@ -120,7 +120,7 @@ export default function CaptureProgressScreen({ onClose, onBack, onComplete }) {
             />
           </div>
           <div className={styles.headerText}>
-            <span className={styles.headerTitle}>AkovoLabs Snap</span>
+            <span className={styles.headerTitle}>AkovoLabs <span className={styles.accent}>Snap</span></span>
             <span className={styles.headerSubtitle}>
               Capture beyond the screen.
             </span>

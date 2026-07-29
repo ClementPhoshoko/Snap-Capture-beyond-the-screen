@@ -13,6 +13,7 @@
 
 .card.default {
   background: var(--card-bg);
+  border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
   backdrop-filter: blur(var(--glass-blur-md));
   -webkit-backdrop-filter: blur(var(--glass-blur-md));
@@ -20,13 +21,14 @@
 }
 
 .card.default:hover {
-  background: var(--glass-bg-elevated);
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-strong);
   box-shadow: var(--glass-shadow);
 }
 
 .card.primary {
-  background: var(--brand-primary);
-  box-shadow: var(--glass-shadow-sm);
+  background: var(--gradient-accent);
+  box-shadow: 0 4px 16px rgba(124, 92, 252, 0.25);
   border-radius: var(--radius-md);
 }
 

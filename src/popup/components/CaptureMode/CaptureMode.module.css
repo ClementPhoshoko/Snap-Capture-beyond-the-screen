@@ -64,7 +64,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
+  color: var(--text-accent);
   transition:
     background var(--duration-normal) var(--ease-default),
     color var(--duration-normal) var(--ease-default),
