@@ -12,8 +12,6 @@ export const DEFAULT_SETTINGS = Object.freeze({
   quality: "high",
   delay: "0",
   floatingMode: "smart",
-  hideFixed: false,
-  ignoreSticky: false,
   location: "downloads",
   autoDownload: false,
   namingPattern: "Snap_{title}-{date}-{time}",

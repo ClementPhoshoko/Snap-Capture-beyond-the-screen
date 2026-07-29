@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, X, SlidersHorizontal, Clock, Eye, EyeOff, FileText, Palette, SunMoon, RefreshCw } from "lucide-react";
+import { ArrowLeft, X, SlidersHorizontal, Clock, EyeOff, FileText, Palette, SunMoon, RefreshCw } from "lucide-react";
 import GlassCard from "../../components/GlassCard";
-import Switch from "../../components/Switch";
 import SettingsRow from "../../components/SettingsRow";
 import SettingsSelect from "../../components/SettingsSelect";
 import ThemeSelector from "../../components/ThemeSelector";
@@ -40,8 +39,8 @@ const delayOptions = [
 ];
 
 const floatingOptions = [
-  { value: "smart", label: "Smart (top/bottom bars)" },
-  { value: "none", label: "Keep floating UI" },
+  { value: "smart", label: "Hide headers & footers" },
+  { value: "none", label: "Keep all floating UI" },
   { value: "all", label: "Hide all floating UI" },
 ];
 
@@ -139,32 +138,6 @@ export default function Settings({ onBack, onClose, theme, accent, onThemeChange
                   options={delayOptions}
                   value={settings.delay}
                   onChange={(v) => update("delay", v)}
-                />
-              }
-            />
-            <div className={styles.divider} />
-            <SettingsRow
-              icon={EyeOff}
-              label="Hide Fixed Elements"
-              description="Temporarily hide fixed position elements"
-              control={
-                <Switch
-                  checked={settings.hideFixed}
-                  onChange={(v) => update("hideFixed", v)}
-                  id="hide-fixed"
-                />
-              }
-            />
-            <div className={styles.divider} />
-            <SettingsRow
-              icon={Eye}
-              label="Ignore Sticky Elements"
-              description="Skip sticky-positioned elements"
-              control={
-                <Switch
-                  checked={settings.ignoreSticky}
-                  onChange={(v) => update("ignoreSticky", v)}
-                  id="ignore-sticky"
                 />
               }
             />

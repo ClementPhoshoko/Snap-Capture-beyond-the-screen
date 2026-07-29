@@ -37,8 +37,8 @@ function walkElements(root, visit) {
   }
 }
 
-export function hidePositionedElements({ floatingMode = "smart", hideFixed, ignoreSticky }) {
-  if (floatingMode === "none" && !hideFixed && !ignoreSticky) return () => {};
+export function hidePositionedElements({ floatingMode = "smart" }) {
+  if (floatingMode === "none") return () => {};
   const changed = [];
   const candidates = [];
   walkElements(document.documentElement, (node) => {
@@ -47,11 +47,13 @@ export function hidePositionedElements({ floatingMode = "smart", hideFixed, igno
     if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) return;
     const position = style.position;
     const isPositioned = position === "fixed" || position === "sticky";
-    const geometry = isFloatingBarGeometry(node.getBoundingClientRect(), { width: window.innerWidth, height: window.innerHeight });
-    const isLayeredBar = isLayeredEdgeElement(node, style) && geometry;
-    const hideAll = (hideFixed && position === "fixed") || (ignoreSticky && position === "sticky") || (floatingMode === "all" && (isPositioned || isLayeredBar));
-    const hideSmart = floatingMode === "smart" && (isPositioned || isLayeredBar) && geometry;
-    if (hideAll || hideSmart) candidates.push(node);
+    if (floatingMode === "all") {
+      const isLayeredBar = isLayeredEdgeElement(node, style);
+      if (isPositioned || isLayeredBar) candidates.push(node);
+    } else {
+      const geometry = isFloatingBarGeometry(node.getBoundingClientRect(), { width: window.innerWidth, height: window.innerHeight });
+      if ((isPositioned || isLayeredEdgeElement(node, style)) && geometry) candidates.push(node);
+    }
   });
   for (const node of candidates) {
     if (!candidates.some((candidate) => candidate !== node && candidate.contains(node))) {

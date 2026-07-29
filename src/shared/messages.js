@@ -31,8 +31,7 @@ export const MessageType = Object.freeze({
  * @param {"high"|"medium"|"low"} [settings.quality]
  * @param {string} [settings.format]
  * @param {number} [settings.delay]
- * @param {boolean} [settings.hideFixed]
- * @param {boolean} [settings.ignoreSticky]
+ * @param {"smart"|"none"|"all"} [settings.floatingMode]
  * @param {boolean} [settings.autoDownload]
  */
 export function buildStartCapture(mode, settings = {}) {
