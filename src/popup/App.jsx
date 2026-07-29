@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import CaptureProgress from "./pages/CaptureProgress";
 import CaptureComplete from "./pages/CaptureComplete";
 import Settings from "./pages/Settings";
+import History from "./pages/History";
 
 const accentValues = {
   purple: { primary: "#7c5cfc", light: "#a78bfa", dark: "#5b3fd4" },
@@ -46,14 +47,16 @@ function App() {
     capture: "home",
     complete: "home",
     settings: "settings",
+    history: "history",
   };
 
   const handleNavChange = (navId) => {
     if (navId === "settings") setPage("settings");
+    else if (navId === "history") setPage("history");
     else setPage("home");
   };
 
-  const constrainHeight = page === "settings" || prevPage === "settings";
+  const constrainHeight = page === "settings" || prevPage === "settings" || page === "history" || prevPage === "history";
 
   return (
     <Layout navPage={navMap[page]} onNavChange={handleNavChange} constrainHeight={constrainHeight}>
@@ -89,6 +92,12 @@ function App() {
             accent={accent}
             onThemeChange={setTheme}
             onAccentChange={setAccent}
+          />
+        )}
+        {page === "history" && (
+          <History
+            key="history"
+            onClose={() => setPage("home")}
           />
         )}
       </AnimatePresence>
