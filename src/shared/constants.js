@@ -5,6 +5,7 @@ export const MAX_OUTPUT_PIXELS = 120_000_000;
 export const MAX_SCROLL_STEPS = 300;
 export const MAX_PAGE_HEIGHT = 200_000;
 export const CAPTURE_TIMEOUT_MS = 120_000;
+export const MAX_TAIL_GROWTH_ATTEMPTS = 3;
 
 export const DEFAULT_SETTINGS = Object.freeze({
   format: "png",

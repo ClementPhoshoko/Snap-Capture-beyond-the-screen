@@ -54,7 +54,6 @@ export function hidePositionedElements({ floatingMode = "smart", hideFixed, igno
     if (hideAll || hideSmart) candidates.push(node);
   });
   for (const node of candidates) {
-    // Hiding a parent also hides children; avoid recording redundant mutations.
     if (!candidates.some((candidate) => candidate !== node && candidate.contains(node))) {
       changed.push({ node, value: node.style.getPropertyValue("visibility"), priority: node.style.getPropertyPriority("visibility") });
       node.style.setProperty("visibility", "hidden", "important");
@@ -64,6 +63,56 @@ export function hidePositionedElements({ floatingMode = "smart", hideFixed, igno
     for (const { node, value, priority } of changed) {
       if (value) node.style.setProperty("visibility", value, priority);
       else node.style.removeProperty("visibility");
+    }
+  };
+}
+
+export function expandNestedScrollContainers() {
+  const changed = [];
+  walkElements(document.documentElement, (node) => {
+    if (node === document.body || node === document.documentElement) return;
+    const style = getComputedStyle(node);
+    const overflowY = style.overflowY;
+    if (overflowY !== "scroll" && overflowY !== "auto") return;
+    if (node.scrollHeight <= node.clientHeight) return;
+    changed.push({
+      node,
+      overflow: node.style.getPropertyValue("overflow"),
+      overflowPriority: node.style.getPropertyPriority("overflow"),
+      overflowY: node.style.getPropertyValue("overflow-y"),
+      overflowYPriority: node.style.getPropertyPriority("overflow-y"),
+      maxHeight: node.style.getPropertyValue("max-height"),
+      maxHeightPriority: node.style.getPropertyPriority("max-height"),
+    });
+    node.style.setProperty("overflow", "visible", "important");
+    node.style.setProperty("overflow-y", "visible", "important");
+    node.style.setProperty("max-height", "none", "important");
+  });
+  return () => {
+    for (const entry of changed) {
+      const { node, overflow, overflowPriority, overflowY, overflowYPriority, maxHeight, maxHeightPriority } = entry;
+      if (overflow) node.style.setProperty("overflow", overflow, overflowPriority);
+      else node.style.removeProperty("overflow");
+      if (overflowY) node.style.setProperty("overflow-y", overflowY, overflowYPriority);
+      else node.style.removeProperty("overflow-y");
+      if (maxHeight) node.style.setProperty("max-height", maxHeight, maxHeightPriority);
+      else node.style.removeProperty("max-height");
+    }
+  };
+}
+
+export function pauseVideos() {
+  const videos = document.querySelectorAll("video");
+  const paused = [];
+  for (const video of videos) {
+    if (!video.paused) {
+      video.pause();
+      paused.push(video);
+    }
+  }
+  return () => {
+    for (const video of paused) {
+      video.play().catch(() => {});
     }
   };
 }

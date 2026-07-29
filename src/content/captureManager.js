@@ -1,9 +1,9 @@
 import { showCaptureOverlay, hideCaptureOverlay } from "./captureOverlay.js";
-import { analyzePage, hidePositionedElements } from "./pageAnalyzer.js";
+import { analyzePage, hidePositionedElements, expandNestedScrollContainers, pauseVideos } from "./pageAnalyzer.js";
 import { scrollTo, restoreScrollPosition, getScrollPosition, delay } from "./scrollController.js";
 import { sendProgress, sendComplete, sendError, captureTab, downloadResult } from "./messaging.js";
 import { createScrollPlan, outputDimensions, assertCanvasSize, pageExceedsLimits } from "../shared/captureMath.js";
-import { POST_SCROLL_SETTLE_MS, CAPTURE_TIMEOUT_MS } from "../shared/constants.js";
+import { POST_SCROLL_SETTLE_MS, CAPTURE_TIMEOUT_MS, MAX_TAIL_GROWTH_ATTEMPTS } from "../shared/constants.js";
 import { dataUrlSize, formatBytes, formatToDetails, qualityToNumber } from "../shared/helpers.js";
 
 let cancelled = false;
@@ -14,6 +14,15 @@ async function settlePage(ms = POST_SCROLL_SETTLE_MS) {
   await nextFrame();
   await nextFrame();
   if (document.fonts?.ready) await Promise.race([document.fonts.ready, delay(1000)]);
+  if (document.getAnimations) {
+    const running = document.getAnimations().filter(a => a.playState === "running");
+    if (running.length) {
+      await Promise.race([
+        Promise.allSettled(running.map(a => a.finished.catch(() => {}))),
+        delay(ms),
+      ]);
+    }
+  }
   await delay(ms);
 }
 function checkCancelled() { if (cancelled) throw new Error("Capture cancelled"); }
@@ -58,16 +67,18 @@ async function captureVisible(settings) {
 
 async function captureFullPage(settings) {
   sendProgress("analyze", 5);
-  let page = analyzePage();
-  if (pageExceedsLimits(page.scrollHeight, page.vpHeight)) {
-    throw new Error("Page exceeds the maximum capturable height. Reduce browser zoom or capture in sections.");
-  }
-  const captureStart = Date.now();
-  const positions = createScrollPlan(page.scrollHeight, page.vpHeight);
-  const captures = [];
+  const restoreContainers = expandNestedScrollContainers();
+  const resumeVideos = pauseVideos();
   let restoreFloatingElements = () => {};
-  sendProgress("scroll", 10, { currentSection: 0, totalSections: positions.length });
   try {
+    let page = analyzePage();
+    if (pageExceedsLimits(page.scrollHeight, page.vpHeight)) {
+      throw new Error("Page exceeds the maximum capturable height. Reduce browser zoom or capture in sections.");
+    }
+    const captureStart = Date.now();
+    const positions = createScrollPlan(page.scrollHeight, page.vpHeight);
+    const captures = [];
+    sendProgress("scroll", 10, { currentSection: 0, totalSections: positions.length });
     for (let index = 0; index < positions.length; index += 1) {
       checkCancelled();
       if (Date.now() - captureStart > CAPTURE_TIMEOUT_MS) {
@@ -84,14 +95,25 @@ async function captureFullPage(settings) {
       captures.push({ imageData, y: actualY });
       sendProgress("capture", 10 + ((index + 1) / positions.length) * 65, { currentSection: index + 1, totalSections: positions.length });
     }
-    // A lazy-loaded page may have grown; capture the newly exposed tail once.
-    page = analyzePage();
-    const finalPlan = createScrollPlan(page.scrollHeight, page.vpHeight);
-    const tailY = finalPlan.at(-1);
-    if (tailY > captures.at(-1).y) {
-      scrollTo(tailY);
-      await settlePage();
-      captures.push({ imageData: await captureWithoutOverlay(), y: getScrollPosition() });
+    for (let attempt = 0; attempt < MAX_TAIL_GROWTH_ATTEMPTS; attempt++) {
+      page = analyzePage();
+      const lastY = captures.at(-1).y;
+      const newBottom = Math.max(0, page.scrollHeight - page.vpHeight);
+      if (newBottom <= lastY + page.vpHeight) break;
+      const tailPositions = [];
+      for (let y = lastY + page.vpHeight; y < newBottom && tailPositions.length < 50; y += page.vpHeight) {
+        tailPositions.push(y);
+      }
+      if (tailPositions.length > 0 && tailPositions.at(-1) < newBottom) {
+        tailPositions.push(newBottom);
+      }
+      for (const y of tailPositions) {
+        checkCancelled();
+        if (Date.now() - captureStart > CAPTURE_TIMEOUT_MS) throw new Error("Capture timed out");
+        scrollTo(y);
+        await settlePage();
+        captures.push({ imageData: await captureWithoutOverlay(), y: getScrollPosition() });
+      }
     }
     sendProgress("merge", 78);
     const rendered = await stitchCaptures(captures, page, settings);
@@ -99,6 +121,8 @@ async function captureFullPage(settings) {
     return buildResult(rendered.dataUrl, rendered.width, rendered.height, "fullpage", settings);
   } finally {
     restoreFloatingElements();
+    resumeVideos();
+    restoreContainers();
   }
 }
 
