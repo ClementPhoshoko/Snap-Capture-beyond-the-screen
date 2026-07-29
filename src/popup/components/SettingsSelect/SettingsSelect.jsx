@@ -59,29 +59,31 @@ export default function SettingsSelect({ options = [], value, onChange, menuZInd
         />
       </button>
 
-      {open && createPortal(
+      {createPortal(
         <AnimatePresence>
-          <motion.ul
-            className={styles.menu}
-            style={{ position: "fixed", ...pos, zIndex: menuZIndex }}
-            role="listbox"
-            initial={{ opacity: 0, y: -4, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.97 }}
-            transition={{ duration: 0.12, ease: [0.4, 0, 0.2, 1] }}
-          >
-            {options.map((opt) => (
-              <li
-                key={opt.value}
-                className={`${styles.option} ${opt.value === value ? styles.optionActive : ""}`}
-                role="option"
-                aria-selected={opt.value === value}
-                onClick={() => { onChange(opt.value); setOpen(false); }}
-              >
-                {opt.label}
-              </li>
-            ))}
-          </motion.ul>
+          {open && (
+            <motion.ul
+              className={styles.menu}
+              style={{ position: "fixed", ...pos, zIndex: menuZIndex }}
+              role="listbox"
+              initial={{ opacity: 0, y: -4, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -4, scale: 0.97 }}
+              transition={{ duration: 0.12, ease: [0.4, 0, 0.2, 1] }}
+            >
+              {options.map((opt) => (
+                <li
+                  key={opt.value}
+                  className={`${styles.option} ${opt.value === value ? styles.optionActive : ""}`}
+                  role="option"
+                  aria-selected={opt.value === value}
+                  onClick={() => { onChange(opt.value); setOpen(false); }}
+                >
+                  {opt.label}
+                </li>
+              ))}
+            </motion.ul>
+          )}
         </AnimatePresence>,
         document.body
       )}

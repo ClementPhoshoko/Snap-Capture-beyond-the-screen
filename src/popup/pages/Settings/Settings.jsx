@@ -101,116 +101,118 @@ export default function Settings({ onBack, onClose, theme, accent, onThemeChange
         <div className={styles.divider} />
       </motion.div>
 
-      {/* Section: Capture */}
-      <motion.div className={styles.content} variants={itemVariants}>
-        <h3 className={styles.sectionTitle}>Capture</h3>
-        <GlassCard className={styles.card}>
-          <SettingsRow
-            icon={SlidersHorizontal}
-            label="Image Quality"
-            description="Output compression level"
-            control={
-              <SettingsSelect
-                options={qualityOptions}
-                value={settings.quality}
-                onChange={(v) => update("quality", v)}
-              />
-            }
-          />
-          <div className={styles.divider} />
-          <SettingsRow
-            icon={Clock}
-            label="Capture Delay"
-            description="Wait before starting the capture"
-            control={
-              <SettingsSelect
-                options={delayOptions}
-                value={settings.delay}
-                onChange={(v) => update("delay", v)}
-              />
-            }
-          />
-          <div className={styles.divider} />
-          <SettingsRow
-            icon={EyeOff}
-            label="Hide Fixed Elements"
-            description="Temporarily hide fixed position elements"
-            control={
-              <Switch
-                checked={settings.hideFixed}
-                onChange={(v) => update("hideFixed", v)}
-                id="hide-fixed"
-              />
-            }
-          />
-          <div className={styles.divider} />
-          <SettingsRow
-            icon={Eye}
-            label="Ignore Sticky Elements"
-            description="Skip sticky-positioned elements"
-            control={
-              <Switch
-                checked={settings.ignoreSticky}
-                onChange={(v) => update("ignoreSticky", v)}
-                id="ignore-sticky"
-              />
-            }
-          />
-        </GlassCard>
-      </motion.div>
+      <div className={styles.scrollArea}>
+        {/* Section: Capture */}
+        <motion.div className={styles.content} variants={itemVariants}>
+          <h3 className={styles.sectionTitle}>Capture</h3>
+          <GlassCard className={styles.card}>
+            <SettingsRow
+              icon={SlidersHorizontal}
+              label="Image Quality"
+              description="Output compression level"
+              control={
+                <SettingsSelect
+                  options={qualityOptions}
+                  value={settings.quality}
+                  onChange={(v) => update("quality", v)}
+                />
+              }
+            />
+            <div className={styles.divider} />
+            <SettingsRow
+              icon={Clock}
+              label="Capture Delay"
+              description="Wait time before capture"
+              control={
+                <SettingsSelect
+                  options={delayOptions}
+                  value={settings.delay}
+                  onChange={(v) => update("delay", v)}
+                />
+              }
+            />
+            <div className={styles.divider} />
+            <SettingsRow
+              icon={EyeOff}
+              label="Hide Fixed Elements"
+              description="Temporarily hide fixed position elements"
+              control={
+                <Switch
+                  checked={settings.hideFixed}
+                  onChange={(v) => update("hideFixed", v)}
+                  id="hide-fixed"
+                />
+              }
+            />
+            <div className={styles.divider} />
+            <SettingsRow
+              icon={Eye}
+              label="Ignore Sticky Elements"
+              description="Skip sticky-positioned elements"
+              control={
+                <Switch
+                  checked={settings.ignoreSticky}
+                  onChange={(v) => update("ignoreSticky", v)}
+                  id="ignore-sticky"
+                />
+              }
+            />
+          </GlassCard>
+        </motion.div>
 
-      {/* Section: Output */}
-      <motion.div className={styles.content} variants={itemVariants}>
-        <h3 className={styles.sectionTitle}>Output</h3>
-        <GlassCard className={styles.card}>
-          <SettingsRow
-            icon={FileText}
-            label="File Naming Pattern"
-            description="Template for generated filenames"
-            variant="column"
-            control={
-              <SettingsSelect
-                options={namingOptions}
-                value={settings.namingPattern}
-                onChange={(v) => update("namingPattern", v)}
-                menuZIndex={200}
-              />
-            }
-          />
-        </GlassCard>
-      </motion.div>
+        {/* Section: Output */}
+        <motion.div className={styles.content} variants={itemVariants}>
+          <h3 className={styles.sectionTitle}>Output</h3>
+          <GlassCard className={styles.card}>
+            <SettingsRow
+              icon={FileText}
+              label="File Naming Pattern"
+              description="Template for generated filenames"
+              variant="column"
+              control={
+                <SettingsSelect
+                  options={namingOptions}
+                  value={settings.namingPattern}
+                  onChange={(v) => update("namingPattern", v)}
+                  menuZIndex={200}
+                />
+              }
+            />
+          </GlassCard>
+        </motion.div>
 
-      {/* Section: Appearance */}
-      <motion.div className={styles.content} variants={itemVariants}>
-        <h3 className={styles.sectionTitle}>Appearance</h3>
-        <GlassCard className={styles.card}>
-          <SettingsRow
-            icon={SunMoon}
-            label="Theme"
-            description="Choose your preferred appearance"
-            variant="column"
-            control={
-              <ThemeSelector
-                value={theme}
-                onChange={onThemeChange}
-              />
-            }
-          />
-          <div className={styles.divider} />
-          <SettingsRow
-            icon={Palette}
-            label="Accent Color"
-            description="Primary brand color throughout the UI"
-            variant="column"
-            control={
-              <AccentPicker
-                value={accent}
-                onChange={onAccentChange}
-              />
-            }
-          />
-        </GlassCard>
-      </motion.div>
+        {/* Section: Appearance */}
+        <motion.div className={styles.content} variants={itemVariants}>
+          <h3 className={styles.sectionTitle}>Appearance</h3>
+          <GlassCard className={styles.card}>
+            <SettingsRow
+              icon={SunMoon}
+              label="Theme"
+              description="Choose your preferred appearance"
+              variant="column"
+              control={
+                <ThemeSelector
+                  value={theme}
+                  onChange={onThemeChange}
+                />
+              }
+            />
+            <div className={styles.divider} />
+            <SettingsRow
+              icon={Palette}
+              label="Accent Color"
+              description="Primary brand color throughout the UI"
+              variant="column"
+              control={
+                <AccentPicker
+                  value={accent}
+                  onChange={onAccentChange}
+                />
+              }
+            />
+          </GlassCard>
+        </motion.div>
+      </div>
 
       {/* Section: Advanced */}
       <motion.div className={styles.content} variants={itemVariants}>

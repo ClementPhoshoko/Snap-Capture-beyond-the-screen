@@ -23,6 +23,7 @@ function hexToRgba(hex, alpha) {
 
 function App() {
   const [page, setPage] = useState("home");
+  const [prevPage, setPrevPage] = useState(null);
   const [theme, setTheme] = useState("dark");
   const [accent, setAccent] = useState("purple");
 
@@ -52,9 +53,11 @@ function App() {
     else setPage("home");
   };
 
+  const constrainHeight = page === "settings" || prevPage === "settings";
+
   return (
-    <Layout navPage={navMap[page]} onNavChange={handleNavChange}>
-      <AnimatePresence mode="wait">
+    <Layout navPage={navMap[page]} onNavChange={handleNavChange} constrainHeight={constrainHeight}>
+      <AnimatePresence mode="wait" onExitComplete={() => setPrevPage(page)}>
         {page === "home" && (
           <Home
             key="home"

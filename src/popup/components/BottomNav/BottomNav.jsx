@@ -4,7 +4,7 @@ import styles from "./BottomNav.module.css";
 
 const navItems = [
   { id: "history", label: "History", icon: History },
-  { id: "home", label: "AkovoLabs", icon: Building2 },
+  { id: "home", label: "Snap", icon: Building2 },
   { id: "settings", label: "Settings", icon: SlidersHorizontal },
 ];
 
