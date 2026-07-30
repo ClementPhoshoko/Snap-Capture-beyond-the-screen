@@ -1,7 +1,8 @@
-import { DEFAULT_SETTINGS } from "./constants.js";
+import { DEFAULT_SETTINGS, AI_DEFAULT_SETTINGS } from "./constants.js";
 
 const SETTINGS_KEY = "settings";
 const HISTORY_KEY = "captureHistory";
+const AI_CONFIG_KEY = "aiConfig";
 
 export async function getSettings() {
   const stored = await chrome.storage.local.get(SETTINGS_KEY);
@@ -45,4 +46,15 @@ export async function recordCapture(result) {
   };
   await chrome.storage.local.set({ [HISTORY_KEY]: [entry, ...entries].slice(0, 50) });
   return entry;
+}
+
+export async function getAIConfig() {
+  const stored = await chrome.storage.local.get(AI_CONFIG_KEY);
+  return { ...AI_DEFAULT_SETTINGS, ...(stored[AI_CONFIG_KEY] || {}) };
+}
+
+export async function saveAIConfig(config) {
+  const next = { ...AI_DEFAULT_SETTINGS, ...config };
+  await chrome.storage.local.set({ [AI_CONFIG_KEY]: next });
+  return next;
 }

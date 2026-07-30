@@ -202,3 +202,209 @@
   outline: 2px solid var(--glass-border-focus);
   outline-offset: 2px;
 }
+
+.aiKeyInput {
+  width: 100%;
+  height: var(--input-height);
+  padding: 0 var(--space-3);
+  padding-right: 36px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--input-radius);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-mono);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-default);
+  box-sizing: border-box;
+}
+
+.aiKeyInput:focus {
+  border-color: var(--input-border-focus);
+}
+
+.aiKeyInput::placeholder {
+  color: var(--text-tertiary);
+  font-family: var(--font-family);
+}
+
+.aiKeyInput::-ms-reveal,
+.aiKeyInput::-ms-clear {
+  display: none;
+}
+
+.aiKeyInput::-webkit-credentials-auto-fill-button {
+  display: none !important;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.toggleBtn {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  outline: none;
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+.toggleBtn:hover {
+  color: var(--text-primary);
+}
+
+.saveBtn {
+  padding: var(--space-1) var(--space-3);
+  background: var(--gradient-accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  outline: none;
+  height: var(--input-height);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.saveBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.statusMsg {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-2xs);
+  color: var(--status-success);
+}
+
+.aiRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.aiRowHeader {
+  display: flex;
+  align-items: center;
+}
+
+.aiRowLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.aiIconWrap {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--interactive-bg);
+  border: 1px solid var(--interactive-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-accent);
+  flex-shrink: 0;
+}
+
+.aiLabel {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.aiInputRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.aiInputWrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.aiDesc {
+  font-size: var(--font-size-2xs);
+  color: var(--text-tertiary);
+  line-height: var(--line-height-normal);
+  padding-left: 36px;
+}
+
+.testRow {
+  padding-left: 36px;
+}
+
+.testBtn {
+  padding: var(--space-1) var(--space-3);
+  background: var(--interactive-bg);
+  border: 1px solid var(--interactive-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-medium);
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: background var(--duration-fast) var(--ease-default);
+}
+
+.testBtn:hover {
+  background: var(--interactive-bg-hover);
+}
+
+.testBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.testSuccess {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  padding-left: 36px;
+  font-size: var(--font-size-2xs);
+  color: var(--status-success);
+}
+
+.testError {
+  padding: var(--space-2) var(--space-3);
+  padding-left: 36px;
+}
+
+.testErrorText {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-2xs);
+  color: var(--status-error);
+  word-break: break-word;
+}
+
+.modelList {
+  font-size: var(--font-size-2xs);
+  color: var(--text-tertiary);
+  line-height: var(--line-height-normal);
+  margin-top: var(--space-1);
+}

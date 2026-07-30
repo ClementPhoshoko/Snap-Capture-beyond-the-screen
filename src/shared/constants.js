@@ -24,3 +24,29 @@ export const FORMAT_DETAILS = Object.freeze({
   jpeg: { mime: "image/jpeg", extension: "jpg" },
   webp: { mime: "image/webp", extension: "webp" },
 });
+
+export const AI_DEFAULT_SETTINGS = Object.freeze({
+  apiKey: "",
+  provider: "gemini",
+  model: "gemini-3.6-flash",
+  modelsCascade: ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-pro-preview"],
+});
+
+export const EXTRACT_DESIGN_STAGES = [
+  "capture",
+  "dom",
+  "styles",
+  "css-vars",
+  "fonts",
+  "images",
+  "svgs",
+  "icons",
+  "layout",
+  "spacing",
+  "assets",
+  "payload",
+  "generate",
+  "verify",
+  "improve",
+  "export",
+];

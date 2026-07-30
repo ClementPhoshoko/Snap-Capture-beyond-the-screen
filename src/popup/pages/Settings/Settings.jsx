@@ -1,10 +1,12 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, X, SlidersHorizontal, Clock, EyeOff, FileText, Palette, SunMoon, RefreshCw } from "lucide-react";
+import { ArrowLeft, X, SlidersHorizontal, Clock, EyeOff, FileText, Palette, SunMoon, RefreshCw, Key, Check, AlertCircle } from "lucide-react";
 import GlassCard from "../../components/GlassCard";
 import SettingsRow from "../../components/SettingsRow";
 import SettingsSelect from "../../components/SettingsSelect";
 import ThemeSelector from "../../components/ThemeSelector";
 import AccentPicker from "../../components/AccentPicker";
+import { getAIConfig, saveAIConfig } from "../../../shared/storage";
 import styles from "./Settings.module.css";
 
 const pageVariants = {
@@ -53,6 +55,94 @@ const namingOptions = [
 
 export default function Settings({ onBack, onClose, theme, accent, onThemeChange, onAccentChange, settings, onSettingsChange, onResetSettings }) {
   const update = (key, value) => onSettingsChange({ ...settings, [key]: value });
+  const [aiConfig, setAIConfig] = useState(null);
+  const [showKey, setShowKey] = useState(false);
+  const [keyStatus, setKeyStatus] = useState(null);
+  const [testStatus, setTestStatus] = useState("idle");
+  const [testResult, setTestResult] = useState(null);
+
+  useEffect(() => {
+    getAIConfig().then(setAIConfig).catch(() => {});
+  }, []);
+
+  const updateAIKey = (apiKey) => {
+    const next = { ...aiConfig, apiKey };
+    setAIConfig(next);
+  };
+
+  const saveKey = async () => {
+    await saveAIConfig(aiConfig);
+    setKeyStatus("saved");
+    setTimeout(() => setKeyStatus(null), 2000);
+  };
+
+  const testConnection = async () => {
+    setTestStatus("testing");
+    setTestResult(null);
+    try {
+      const apiKey = aiConfig?.apiKey;
+      if (!apiKey) {
+        setTestResult({ success: false, error: "No API key saved" });
+        setTestStatus("error");
+        return;
+      }
+      const base = "https://generativelanguage.googleapis.com/v1beta";
+      const revision = "2026-05-20";
+      const modelsToProbe = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-pro-preview"];
+
+      let found = false;
+      let probeErrors = [];
+      for (const model of modelsToProbe) {
+        for (const label of ["interactions", "genContent"]) {
+          let url, body, headers;
+          if (label === "interactions") {
+            url = "interactions";
+            headers = { "Api-Revision": revision };
+            body = { model, input: { parts: [{ text: "ping" }] }, config: { generation_config: { max_output_tokens: 10 } } };
+          } else {
+            url = `models/${model}:generateContent`;
+            headers = {};
+            body = { contents: [{ parts: [{ text: "ping" }] }] };
+          }
+          const genResp = await fetch(`${base}/${url}?key=${apiKey}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...headers,
+            },
+            body: JSON.stringify(body),
+          });
+          if (genResp.ok) {
+            setTestResult({ success: true, models: modelsToProbe });
+            setTestStatus("success");
+            found = true;
+            break;
+          }
+          const errData = await genResp.json().catch(() => ({}));
+          const msg = errData.error?.message || `HTTP ${genResp.status}`;
+          if (msg.toLowerCase().includes("quota") || msg.toLowerCase().includes("limit") || msg.toLowerCase().includes("rate")) {
+            setTestResult({ success: false, error: msg, models: modelsToProbe });
+            setTestStatus("error");
+            found = true;
+            break;
+          }
+          probeErrors.push(`${model} (${label}): ${msg}`);
+        }
+        if (found) break;
+      }
+      if (!found) {
+        setTestResult({
+          success: false,
+          error: `No working model. Errors:\n${probeErrors.slice(0, 6).join("\n")}`,
+          models: modelsToProbe,
+        });
+        setTestStatus("error");
+      }
+    } catch (err) {
+      setTestResult({ success: false, error: err.message });
+      setTestStatus("error");
+    }
+  };
 
   return (
     <motion.div
@@ -143,6 +233,91 @@ export default function Settings({ onBack, onClose, theme, accent, onThemeChange
             />
           </GlassCard>
         </motion.div>
+
+        {/* Section: AI Configuration */}
+        {aiConfig && (
+          <motion.div className={styles.content} variants={itemVariants}>
+            <h3 className={styles.sectionTitle}>AI Configuration</h3>
+            <GlassCard className={styles.card}>
+              <div className={styles.aiRow}>
+                <div className={styles.aiRowHeader}>
+                  <div className={styles.aiRowLeft}>
+                    <div className={styles.aiIconWrap}>
+                      <Key size={13} />
+                    </div>
+                    <span className={styles.aiLabel}>Gemini API Key</span>
+                  </div>
+                </div>
+                <div className={styles.aiInputRow}>
+                  <div className={styles.aiInputWrap}>
+                    <input
+                      type={showKey ? "text" : "password"}
+                      className={styles.aiKeyInput}
+                      value={aiConfig.apiKey || ""}
+                      onChange={(e) => updateAIKey(e.target.value)}
+                      placeholder="Enter your Gemini API key"
+                      aria-label="Gemini API Key"
+                    />
+                    <button
+                      className={styles.toggleBtn}
+                      onClick={() => setShowKey(!showKey)}
+                      aria-label={showKey ? "Hide key" : "Show key"}
+                      type="button"
+                    >
+                      {showKey ? <EyeOff size={14} /> : <Key size={14} />}
+                    </button>
+                  </div>
+                  <motion.button
+                    className={styles.saveBtn}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={saveKey}
+                    disabled={!aiConfig.apiKey}
+                    aria-label="Save API key"
+                  >
+                    {keyStatus === "saved" ? <Check size={14} /> : "Save"}
+                  </motion.button>
+                </div>
+                <span className={styles.aiDesc}>Your Google AI Studio API key for design extraction</span>
+                {keyStatus === "saved" && (
+                  <div className={styles.statusMsg}>
+                    <Check size={12} /> Key saved successfully
+                  </div>
+                )}
+                <div className={styles.testRow}>
+                  <motion.button
+                    className={styles.testBtn}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={testConnection}
+                    disabled={testStatus === "testing" || !aiConfig.apiKey}
+                    aria-label="Test API connection"
+                  >
+                    {testStatus === "testing" ? "Testing..." : "Test Connection"}
+                  </motion.button>
+                </div>
+                {testResult && (
+                  <div className={testResult.success ? styles.testSuccess : styles.testError}>
+                    {testResult.success ? (
+                      <>
+                        <Check size={12} /> API key valid
+                        {testResult.models.length > 0 && (
+                          <div className={styles.modelList}>
+                            Available models: {testResult.models.join(", ")}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <span className={styles.testErrorText}>
+                        <AlertCircle size={12} /> {testResult.error}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </GlassCard>
+          </motion.div>
+        )}
 
         {/* Section: Output */}
         <motion.div className={styles.content} variants={itemVariants}>

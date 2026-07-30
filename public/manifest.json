@@ -5,6 +5,7 @@
   "description": "Capture visible areas and complete web pages as images.",
   "minimum_chrome_version": "120",
   "permissions": ["activeTab", "tabs", "scripting", "storage", "downloads"],
+  "host_permissions": ["https://generativelanguage.googleapis.com/*"],
   "action": {
     "default_popup": "index.html",
     "default_icon": {

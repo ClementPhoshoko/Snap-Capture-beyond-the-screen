@@ -21,6 +21,13 @@ export const MessageType = Object.freeze({
   PING: "SNAP/PING",
   CANCEL_CAPTURE: "SNAP/CANCEL_CAPTURE",
   DOWNLOAD_RESULT: "SNAP/DOWNLOAD_RESULT",
+  EXTRACT_DESIGN: "SNAP/EXTRACT_DESIGN",
+  EXTRACT_DESIGN_PROGRESS: "SNAP/EXTRACT_DESIGN_PROGRESS",
+  EXTRACT_DESIGN_COMPLETE: "SNAP/EXTRACT_DESIGN_COMPLETE",
+  EXTRACT_DESIGN_ERROR: "SNAP/EXTRACT_DESIGN_ERROR",
+  AI_CONFIG_SAVE: "SNAP/AI_CONFIG_SAVE",
+  AI_CONFIG_GET: "SNAP/AI_CONFIG_GET",
+  AI_CONFIG_TEST: "SNAP/AI_CONFIG_TEST",
 });
 
 // ─── Payload builders ────────────────────────────────────────
@@ -92,6 +99,27 @@ export function buildError(code, message, recoverable = false) {
   };
 }
 
+export function buildExtractDesignProgress(stage, percent, detail = {}) {
+  return {
+    type: MessageType.EXTRACT_DESIGN_PROGRESS,
+    payload: { stage, percent, ...detail },
+  };
+}
+
+export function buildExtractDesignComplete(result) {
+  return {
+    type: MessageType.EXTRACT_DESIGN_COMPLETE,
+    payload: result,
+  };
+}
+
+export function buildExtractDesignError(code, message, recoverable = false) {
+  return {
+    type: MessageType.EXTRACT_DESIGN_ERROR,
+    payload: { code, message, recoverable },
+  };
+}
+
 // ─── Send helpers ────────────────────────────────────────────
 
 /**
@@ -103,10 +131,18 @@ export function sendToBackground(message) {
     console.warn("[Snap] chrome.runtime.sendMessage not available");
     return Promise.resolve({ success: false, error: "chrome.runtime not available" });
   }
-  return chrome.runtime.sendMessage(message).catch((err) => ({
-    success: false,
-    error: err.message ?? "Failed to reach background",
-  }));
+  try {
+    const result = chrome.runtime.sendMessage(message);
+    if (result instanceof Promise) {
+      return result.then((res) => res || { success: false, error: "Background did not respond" }).catch((err) => ({
+        success: false,
+        error: err.message ?? "Failed to reach background",
+      }));
+    }
+    return Promise.resolve({ success: false, error: "Background did not respond" });
+  } catch (err) {
+    return Promise.resolve({ success: false, error: err.message ?? "Unexpected error" });
+  }
 }
 
 /**

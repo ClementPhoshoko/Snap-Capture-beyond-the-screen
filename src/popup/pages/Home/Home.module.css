@@ -12,3 +12,14 @@
   flex-direction: column;
   min-width: 0;
 }
+
+.actionRow {
+  display: flex;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.actionRow > * {
+  flex: 1;
+  min-width: 0;
+}

@@ -2,22 +2,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-1) var(--space-3);
   cursor: pointer;
   font-family: inherit;
-  transition:
-    background var(--duration-fast) var(--ease-default),
-    box-shadow var(--duration-fast) var(--ease-default);
   outline: none;
 }
 
 .card.default {
+  padding: var(--space-1) var(--space-3);
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
   backdrop-filter: blur(var(--glass-blur-md));
   -webkit-backdrop-filter: blur(var(--glass-blur-md));
   border-radius: var(--radius-md);
+  transition:
+    background var(--duration-fast) var(--ease-default),
+    box-shadow var(--duration-fast) var(--ease-default);
 }
 
 .card.default:hover {
@@ -27,13 +27,24 @@
 }
 
 .card.primary {
+  width: 100%;
+  height: var(--btn-height-sm);
+  border-radius: var(--btn-radius);
   background: var(--gradient-accent);
+  border: none;
+  color: #ffffff;
+  font-size: var(--font-size-xs);
+  font-weight: var(--btn-font-weight);
+  gap: var(--space-2);
   box-shadow: 0 4px 16px rgba(124, 92, 252, 0.25);
-  border-radius: var(--radius-md);
+  transition:
+    opacity var(--duration-normal) var(--ease-default),
+    transform var(--duration-normal) var(--ease-default);
 }
 
-.card.primary:hover {
-  filter: brightness(1.1);
+.card.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .card:focus-visible {
@@ -45,17 +56,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-md);
   flex-shrink: 0;
 }
 
 .card.default .iconWrap {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
   color: var(--brand-primary);
 }
 
 .card.primary .iconWrap {
+  width: auto;
+  height: auto;
+  border-radius: 0;
   color: #fff;
 }
 
@@ -72,4 +86,6 @@
 
 .card.primary .label {
   color: #fff;
+  font-weight: var(--btn-font-weight);
+  letter-spacing: var(--letter-spacing-wide);
 }

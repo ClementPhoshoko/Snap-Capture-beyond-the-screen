@@ -6,6 +6,7 @@ import CaptureProgress from "./pages/CaptureProgress";
 import CaptureComplete from "./pages/CaptureComplete";
 import Settings from "./pages/Settings";
 import History from "./pages/History";
+import ExtractDesignProgress from "./pages/ExtractDesignProgress";
 import { DEFAULT_SETTINGS } from "../shared/constants";
 import { getSettings, saveSettings, resetSettings, recordCapture } from "../shared/storage";
 
@@ -49,6 +50,7 @@ function App() {
   const [captureParams, setCaptureParams] = useState(null);
   const [captureResult, setCaptureResult] = useState(null);
   const [captureSettings, setCaptureSettings] = useState(DEFAULT_SETTINGS);
+  const [extractResult, setExtractResult] = useState(null);
 
   useEffect(() => {
     getSettings().then(setCaptureSettings).catch(() => {});
@@ -73,12 +75,22 @@ function App() {
     root.style.setProperty("--text-accent", acc.light);
   }, [captureSettings.accent]);
 
+  const handleExtractDesign = () => {
+    setPage("extract");
+  };
+
+  const handleExtractComplete = (result) => {
+    setExtractResult(result);
+    setPage("home");
+  };
+
   const navMap = {
     home: "home",
     capture: "home",
     complete: "home",
     settings: "settings",
     history: "history",
+    extract: "home",
   };
 
   const handleNavChange = (navId) => {
@@ -99,6 +111,7 @@ function App() {
               setCaptureParams(params);
               setPage("capture");
             }}
+            onExtractDesign={handleExtractDesign}
             onSettingsClick={() => setPage("settings")}
             settings={captureSettings}
             onSettingsChange={updateCaptureSettings}
@@ -144,6 +157,14 @@ function App() {
           <History
             key="history"
             onClose={() => setPage("home")}
+          />
+        )}
+        {page === "extract" && (
+          <ExtractDesignProgress
+            key="extract"
+            onBack={() => setPage("home")}
+            onClose={() => setPage("home")}
+            onComplete={handleExtractComplete}
           />
         )}
       </AnimatePresence>
