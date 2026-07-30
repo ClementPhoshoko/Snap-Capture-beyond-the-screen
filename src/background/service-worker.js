@@ -85,18 +85,49 @@ async function handleStartCapture(payload) {
 
 async function handlePDFCapture(tab, payload) {
   const settings = payload.settings || {};
-  const maxPages = 6;
 
   sendProgress("analyze", 2, { message: "Preparing PDF capture" });
 
-  const response = await fetch(tab.url);
-  if (!response.ok) throw new Error(`Failed to fetch PDF: ${response.status}`);
-  const blob = await response.blob();
+  let blob;
+  try {
+    const response = await fetch(tab.url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    blob = await response.blob();
+  } catch {
+    sendProgress("capture", 30, { currentSection: 1, totalSections: 1, message: "Local PDFs can't be fetched — capturing visible page" });
+    const imageData = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "png" });
+    sendProgress("finalize", 95, { message: "Finalizing" });
+
+    const docTitle = tab.title || tab.url?.split("/").pop() || "document";
+    let domain;
+    try { domain = new URL(tab.url).hostname || "local"; } catch { domain = "local"; }
+    const rawSize = Math.floor((imageData.split(",")[1]?.length || 0) * 3 / 4);
+
+    const result = {
+      imageData,
+      dimensions: "—",
+      format: "PNG",
+      size: formatBytes(rawSize),
+      capturedAt: new Date().toISOString(),
+      source: docTitle,
+      title: docTitle,
+      domain,
+      url: tab.url,
+      favicon: "",
+      mode: "visible",
+      settings: { format: "png", location: settings.location, namingPattern: settings.namingPattern },
+    };
+
+    sendProgress("finalize", 100);
+    sendToPopup({ type: MessageType.CAPTURE_COMPLETE, payload: result });
+    return { success: true, data: result };
+  }
+
   const pdfUrl = URL.createObjectURL(blob);
 
   await ensureOffscreenDoc();
 
-  sendProgress("scroll", 10, { currentSection: 0, totalSections: maxPages });
+  sendProgress("scroll", 10, { currentSection: 0, totalSections: 6 });
 
   const format = settings.format || "png";
   const quality = settings.quality || "high";
@@ -115,7 +146,7 @@ async function handlePDFCapture(tab, payload) {
 
   const { imageData, width, height, totalPages, size } = renderResult;
 
-  sendProgress("capture", 50, { currentSection: totalPages, totalSections: maxPages, message: `Captured ${totalPages} page${totalPages > 1 ? "s" : ""}` });
+  sendProgress("capture", 50, { currentSection: totalPages, totalSections: 6, message: `Captured ${totalPages} page${totalPages > 1 ? "s" : ""}` });
   sendProgress("merge", 75, { message: "Stitching PDF pages" });
   sendProgress("finalize", 95, { message: "Finalizing PDF capture" });
 
