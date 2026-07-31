@@ -310,6 +310,8 @@ function truncateJson(obj, maxChars) {
 export async function generateProject(payload, onProgress, signal) {
   const systemInstruction = `Generate a React project matching the provided design data (DOM, styles, screenshots). Match layout, spacing, colors, and typography precisely. Use the visualReferences metadata to understand where each screenshot appears on long pages.
 
+Text policy: Transcribe SHORT UI text exactly — headings, buttons, links, nav items, labels, form placeholders, footer text. For LONG body copy (paragraphs, article text, descriptions over ~120 chars), do NOT transcribe it — use a skeleton placeholder component instead (e.g. <Skeleton rows={n} />) whose height matches the original block. This preserves the visual design while keeping output compact.
+
 Rules: React + CSS Modules, responsive, accessible, no inline styles, clean naming, reusable components.
 
 Output JSON:
@@ -396,7 +398,7 @@ export async function fixDiscrepancies(originalPayload, generatedProject, diffRe
     dom: domSummary,
     projectStructure: projectFiles,
     diffReport,
-    instructions: "Fix the generated project to match original design. Focus on: layout alignment, spacing, colors, fonts, missing sections. Return full updated project JSON with same structure as original generation.",
+    instructions: "Fix the generated project to match original design. Focus on: layout alignment, spacing, colors, fonts, missing sections. Keep short UI text (headings, buttons, links, labels) exact; long body copy stays as skeleton placeholders. Return full updated project JSON with same structure as original generation.",
   };
 
   const data = await cascadeRequest(
