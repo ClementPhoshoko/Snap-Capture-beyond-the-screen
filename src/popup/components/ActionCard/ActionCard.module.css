@@ -5,41 +5,35 @@
   cursor: pointer;
   font-family: inherit;
   outline: none;
-}
-
-.card.default {
+  gap: var(--space-2);
   padding: var(--space-1) var(--space-3);
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: var(--card-shadow);
+  min-height: 44px;
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  box-shadow: none;
   backdrop-filter: blur(var(--glass-blur-md));
   -webkit-backdrop-filter: blur(var(--glass-blur-md));
   border-radius: var(--radius-md);
+  color: var(--text-primary);
   transition:
     background var(--duration-fast) var(--ease-default),
+    border-color var(--duration-fast) var(--ease-default),
     box-shadow var(--duration-fast) var(--ease-default);
 }
 
+.card.default {
+}
+
 .card.default:hover {
-  background: var(--glass-bg-hover);
+  background: var(--glass-bg);
   border-color: var(--glass-border-strong);
   box-shadow: var(--glass-shadow);
 }
 
 .card.primary {
-  width: 100%;
-  height: var(--btn-height-sm);
-  border-radius: var(--btn-radius);
-  background: var(--gradient-accent);
-  border: none;
-  color: #ffffff;
-  font-size: var(--font-size-xs);
-  font-weight: var(--btn-font-weight);
-  gap: var(--space-2);
-  box-shadow: 0 4px 16px rgba(124, 92, 252, 0.25);
-  transition:
-    opacity var(--duration-normal) var(--ease-default),
-    transform var(--duration-normal) var(--ease-default);
+  background: transparent;
+  border-color: var(--glass-border);
+  color: var(--text-primary);
 }
 
 .card.primary:disabled {
@@ -59,18 +53,12 @@
   flex-shrink: 0;
 }
 
-.card.default .iconWrap {
+.card.default .iconWrap,
+.card.primary .iconWrap {
   width: 36px;
   height: 36px;
   border-radius: var(--radius-md);
   color: var(--brand-primary);
-}
-
-.card.primary .iconWrap {
-  width: auto;
-  height: auto;
-  border-radius: 0;
-  color: #fff;
 }
 
 .label {
@@ -80,12 +68,7 @@
   white-space: nowrap;
 }
 
-.card.default .label {
-  color: var(--text-primary);
-}
-
+.card.default .label,
 .card.primary .label {
-  color: #fff;
-  font-weight: var(--btn-font-weight);
-  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-primary);
 }

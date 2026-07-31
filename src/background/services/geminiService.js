@@ -308,7 +308,7 @@ function truncateJson(obj, maxChars) {
 }
 
 export async function generateProject(payload, onProgress, signal) {
-  const systemInstruction = `Generate a React project matching the provided design data (DOM, styles, screenshot). Match layout, spacing, colors, and typography precisely.
+  const systemInstruction = `Generate a React project matching the provided design data (DOM, styles, screenshots). Match layout, spacing, colors, and typography precisely. Use the visualReferences metadata to understand where each screenshot appears on long pages.
 
 Rules: React + CSS Modules, responsive, accessible, no inline styles, clean naming, reusable components.
 
@@ -320,11 +320,14 @@ Output JSON:
   "similarityScore": 95
 }`;
 
-  const { screenshot, ...restPayload } = payload;
+  const { screenshot, screenshots, ...restPayload } = payload;
 
   let userPrompt = JSON.stringify(restPayload);
-  const img = extractScreenshotData(screenshot);
-  const estimated = estimateTokens(userPrompt, img?.data);
+  const imageParts = (screenshots?.length ? screenshots : [screenshot])
+    .map(extractScreenshotData)
+    .filter(Boolean)
+    .slice(0, 4);
+  const estimated = estimateTokens(userPrompt, imageParts.map((img) => img.data).join(""));
 
   // truncate text payload if too large (target ~80k tokens, leave room for image + system)
   const MAX_TEXT_TOKENS = 80000;
@@ -336,7 +339,7 @@ Output JSON:
   }
 
   const parts = [{ text: userPrompt }];
-  if (img) {
+  for (const img of imageParts) {
     parts.push({ inlineData: img });
   }
 

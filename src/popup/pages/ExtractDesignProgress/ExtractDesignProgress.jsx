@@ -19,15 +19,19 @@ import {
   ScanLine,
   Check,
   Download,
+  Clipboard,
 } from "lucide-react";
 import ProgressRing from "../../components/ProgressRing";
 import CapturePipeline from "../../components/CapturePipeline";
 import CaptureStats from "../../components/CaptureStats";
+import ActionCard from "../../components/ActionCard";
 import {
   sendToBackground,
   onMessage,
   offMessage,
 } from "../../../shared/messages";
+import { clearExtractDesignStatus } from "../../../shared/storage";
+import { getDesignExtractArchive } from "../../../shared/designArchive";
 import styles from "../CaptureProgress/CaptureProgress.module.css";
 
 const PIPELINE_ITEMS = [
@@ -59,25 +63,76 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
   const [stats, setStats] = useState(null);
   const startedRef = useRef(false);
 
+  const handleClose = useCallback(() => {
+    if (completed || error) {
+      clearExtractDesignStatus().catch(() => {});
+    }
+    onClose?.();
+  }, [completed, error, onClose]);
+
+  const handleDownloadZip = useCallback(async () => {
+    if (completed?.zipDataUrl) {
+      chrome.downloads.download({
+        url: completed.zipDataUrl,
+        filename: `${completed.projectName || "extracted-design"}.zip`,
+        saveAs: true,
+      });
+      return;
+    }
+    if (!completed?.archiveId) return;
+    const blob = await getDesignExtractArchive(completed.archiveId);
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    chrome.downloads.download({
+      url,
+      filename: `${completed.projectName || "extracted-design"}.zip`,
+      saveAs: true,
+    });
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }, [completed]);
+
+  const handleCopyZip = useCallback(async () => {
+    try {
+      let blob = null;
+      if (completed?.archiveId) {
+        blob = await getDesignExtractArchive(completed.archiveId);
+      }
+      if (!blob && completed?.zipDataUrl) {
+        const response = await fetch(completed.zipDataUrl);
+        blob = await response.blob();
+      }
+      if (!blob) return;
+      await navigator.clipboard.write([
+        new ClipboardItem({ "application/zip": blob }),
+      ]);
+    } catch (error) {
+      console.error("ZIP clipboard write failed", error);
+      alert("Your browser blocked copying the ZIP. Please use Download instead.");
+    }
+  }, [completed]);
+
+  const applyProgress = useCallback(({ stage, percent, currentSection, totalSections, message: msg }) => {
+    setProgress(Math.round(percent));
+    setPipelineItems((prev) => {
+      const stageIdx = STAGE_ORDER.indexOf(stage);
+      return prev.map((item, i) => {
+        if (i < stageIdx) return { ...item, status: "completed" };
+        if (i === stageIdx) {
+          const desc = msg || item.description;
+          return { ...item, status: "active", description: desc };
+        }
+        return item;
+      });
+    });
+    if (currentSection != null && totalSections != null) {
+      setStats((prev) => ({ ...prev, currentSection, totalSections }));
+    }
+  }, []);
+
   const handleMessage = useCallback((message) => {
     switch (message.type) {
       case "SNAP/EXTRACT_DESIGN_PROGRESS": {
-        const { stage, percent, currentSection, totalSections, message: msg } = message.payload;
-        setProgress(Math.round(percent));
-        setPipelineItems((prev) => {
-          const stageIdx = STAGE_ORDER.indexOf(stage);
-          return prev.map((item, i) => {
-            if (i < stageIdx) return { ...item, status: "completed" };
-            if (i === stageIdx) {
-              const desc = msg || item.description;
-              return { ...item, status: "active", description: desc };
-            }
-            return item;
-          });
-        });
-        if (currentSection != null && totalSections != null) {
-          setStats((prev) => ({ ...prev, currentSection, totalSections }));
-        }
+        applyProgress(message.payload);
         break;
       }
       case "SNAP/EXTRACT_DESIGN_COMPLETE": {
@@ -90,7 +145,7 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
         break;
       }
     }
-  }, [onComplete]);
+  }, [applyProgress, onComplete]);
 
   useEffect(() => {
     onMessage(handleMessage);
@@ -100,12 +155,32 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    sendToBackground({ type: "SNAP/EXTRACT_DESIGN", payload: {} }).then((res) => {
+    sendToBackground({ type: "SNAP/EXTRACT_DESIGN_STATUS", payload: {} }).then((statusRes) => {
+      const status = statusRes.data;
+      if (status?.state === "running" && status.payload) {
+        applyProgress(status.payload);
+        return null;
+      }
+      if (status?.state === "complete" && status.result) {
+        setProgress(100);
+        setPipelineItems((prev) => prev.map((item) => ({ ...item, status: "completed" })));
+        setCompleted(status.result);
+        return null;
+      }
+      if (status?.state === "error" && status.error) {
+        setError(status.error);
+        return null;
+      }
+      return sendToBackground({ type: "SNAP/EXTRACT_DESIGN", payload: {} });
+    }).then((res) => {
+      if (!res) return;
       if (!res.success) {
         setError({ code: "START_FAILED", message: res.error || "Extraction did not start" });
+      } else if (res.data) {
+        setCompleted(res.data);
       }
     });
-  }, []);
+  }, [applyProgress]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -126,7 +201,7 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
         transition={{ duration: 0.25 }}
       >
         <div className={styles.header}>
-          <button className={styles.headerBtn} onClick={onClose} aria-label="Close">
+          <button className={styles.headerBtn} onClick={handleClose} aria-label="Close">
             <ArrowLeft size={18} />
           </button>
           <div className={styles.headerCenter}>
@@ -143,7 +218,7 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
               <span className={styles.headerSubtitle}>Extract Design</span>
             </div>
           </div>
-          <button className={styles.headerBtn} onClick={onClose} aria-label="Close">
+          <button className={styles.headerBtn} onClick={handleClose} aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -155,7 +230,7 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
             className={styles.retryBtn}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            onClick={onClose}
+            onClick={handleClose}
           >
             Try Again
           </motion.button>
@@ -174,7 +249,7 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
         transition={{ duration: 0.25 }}
       >
         <div className={styles.header}>
-          <button className={styles.headerBtn} onClick={onClose} aria-label="Close">
+          <button className={styles.headerBtn} onClick={handleClose} aria-label="Close">
             <ArrowLeft size={18} />
           </button>
           <div className={styles.headerCenter}>
@@ -191,7 +266,7 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
               <span className={styles.headerSubtitle}>Extract Design</span>
             </div>
           </div>
-          <button className={styles.headerBtn} onClick={onClose} aria-label="Close">
+          <button className={styles.headerBtn} onClick={handleClose} aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -217,25 +292,11 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
               <span className={styles.completeStatLabel}>Files</span>
             </div>
           </div>
-          {completed.zipDataUrl && (
-            <motion.a
-              className={styles.downloadBtn}
-              href={completed.zipDataUrl}
-              download={`${completed.projectName || "extracted-design"}.zip`}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              <Download size={16} /> Download Project
-            </motion.a>
-          )}
-          <motion.button
-            className={styles.closeBtn}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onClose}
-          >
-            Close
-          </motion.button>
+          <div className={styles.completeActions}>
+            <ActionCard icon={Download} label="Download" onClick={handleDownloadZip} />
+            <ActionCard icon={Clipboard} label="Copy" onClick={handleCopyZip} />
+            <ActionCard icon={X} label="Close" onClick={handleClose} />
+          </div>
         </div>
       </motion.div>
     );

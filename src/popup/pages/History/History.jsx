@@ -5,6 +5,7 @@ import GlassCard from "../../components/GlassCard";
 import HistoryCard from "../../components/HistoryCard";
 import GlassButton from "../../components/GlassButton";
 import { getCaptureHistory, deleteCaptureEntry } from "../../../shared/storage";
+import { deleteDesignExtractArchive, getDesignExtractArchive } from "../../../shared/designArchive";
 import styles from "./History.module.css";
 
 const pageVariants = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.2 } } };
@@ -56,6 +57,19 @@ export default function History({ onClose }) {
     setTimeout(() => URL.revokeObjectURL(objUrl), 10000);
   }, []);
 
+  const handleDownloadDesign = useCallback(async (_id, designExtract) => {
+    if (!designExtract?.archiveId) return;
+    const blob = await getDesignExtractArchive(designExtract.archiveId);
+    if (!blob) return;
+    const objUrl = URL.createObjectURL(blob);
+    chrome.downloads.download({
+      url: objUrl,
+      filename: designExtract.filename || `${designExtract.projectName || "extracted-design"}.zip`,
+      saveAs: true,
+    });
+    setTimeout(() => URL.revokeObjectURL(objUrl), 10000);
+  }, []);
+
   const handleCopy = useCallback(async (_id, dataUrl) => {
     if (!dataUrl) return;
     try {
@@ -77,9 +91,13 @@ export default function History({ onClose }) {
   }, []);
 
   const handleDelete = useCallback(async (id) => {
+    const entry = captures.find((e) => e.id === id);
     setCaptures((prev) => prev.filter((e) => e.id !== id));
+    if (entry?.designExtract?.archiveId) {
+      deleteDesignExtractArchive(entry.designExtract.archiveId).catch(() => {});
+    }
     try { await deleteCaptureEntry(id); } catch { /* silent */ }
-  }, []);
+  }, [captures]);
 
   const handleShare = useCallback(async (_id, dataUrl, pageUrl) => {
     try {
@@ -117,7 +135,7 @@ export default function History({ onClose }) {
           {groups.length > 0 ? groups.map((group) => (
             <div className={styles.content} key={group.label}>
               <h3 className={styles.sectionTitle}>{group.label}</h3>
-              <GlassCard className={styles.card}>{group.items.map((item, index) => <div key={item.id}>{index > 0 && <div className={styles.divider} />}<HistoryCard {...item} time={new Date(item.capturedAt).toLocaleString()} onOpen={() => item.url && chrome.tabs.create({ url: item.url })} onDownload={handleDownload} onCopy={handleCopy} onDelete={handleDelete} onShare={handleShare} /></div>)}</GlassCard>
+              <GlassCard className={styles.card}>{group.items.map((item, index) => <div key={item.id}>{index > 0 && <div className={styles.divider} />}<HistoryCard {...item} time={new Date(item.capturedAt).toLocaleString()} onOpen={() => item.url && chrome.tabs.create({ url: item.url })} onDownload={handleDownload} onDownloadDesign={handleDownloadDesign} onCopy={handleCopy} onDelete={handleDelete} onShare={handleShare} /></div>)}</GlassCard>
             </div>
           )) : (
             <div className={styles.content}><h3 className={styles.sectionTitle}>No matches</h3></div>

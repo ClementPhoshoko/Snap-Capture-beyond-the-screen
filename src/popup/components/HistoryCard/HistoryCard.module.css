@@ -105,6 +105,15 @@
   line-height: var(--line-height-tight);
 }
 
+.extractMeta {
+  font-size: var(--font-size-2xs);
+  color: var(--text-accent);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .time {
   font-size: var(--font-size-2xs);
   color: var(--text-tertiary);

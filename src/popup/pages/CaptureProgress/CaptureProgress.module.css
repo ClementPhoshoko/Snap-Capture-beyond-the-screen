@@ -311,6 +311,14 @@
   padding: var(--space-3) 0;
 }
 
+.completeActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
 .completeStat {
   display: flex;
   flex-direction: column;
@@ -330,34 +338,5 @@
   color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: var(--letter-spacing-wider);
-}
-
-.downloadBtn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-5);
-  background: var(--gradient-accent);
-  border: none;
-  border-radius: var(--radius-full);
-  color: #fff;
-  font-family: inherit;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.closeBtn {
-  margin-top: var(--space-1);
-  padding: var(--space-1) var(--space-4);
-  background: transparent;
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-full);
-  color: var(--text-secondary);
-  font-family: inherit;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
 }
 

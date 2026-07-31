@@ -8,7 +8,7 @@ import Settings from "./pages/Settings";
 import History from "./pages/History";
 import ExtractDesignProgress from "./pages/ExtractDesignProgress";
 import { DEFAULT_SETTINGS } from "../shared/constants";
-import { getSettings, saveSettings, resetSettings, recordCapture } from "../shared/storage";
+import { getExtractDesignStatus, getSettings, saveSettings, resetSettings, recordCapture } from "../shared/storage";
 
 const accentValues = {
   purple: { primary: "#7c5cfc", light: "#a78bfa", dark: "#5b3fd4" },
@@ -54,6 +54,9 @@ function App() {
 
   useEffect(() => {
     getSettings().then(setCaptureSettings).catch(() => {});
+    getExtractDesignStatus().then((status) => {
+      if (status?.state === "running" || status?.state === "complete") setPage("extract");
+    }).catch(() => {});
   }, []);
 
   const updateCaptureSettings = (next) => {
@@ -81,7 +84,6 @@ function App() {
 
   const handleExtractComplete = (result) => {
     setExtractResult(result);
-    setPage("home");
   };
 
   const navMap = {

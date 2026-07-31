@@ -125,18 +125,10 @@ export default function CaptureCompleteScreen({ onBack, onClose, captureResult }
 
       <motion.div className={styles.content} variants={itemVariants}>
         <div className={styles.actions}>
-          <ActionCard icon={Download} label="Download" onClick={handleDownload} variant="primary" />
+          <ActionCard icon={Download} label="Download" onClick={handleDownload} />
           <ActionCard icon={Clipboard} label="Copy" onClick={handleCopy} />
+          <ActionCard icon={ExternalLink} label="Open" onClick={handleOpenTab} />
           <ActionCard icon={Camera} label="New" onClick={onBack} />
-        </div>
-      </motion.div>
-
-      <motion.div className={styles.content} variants={itemVariants}>
-        <div className={styles.footer}>
-          <button className={styles.externalBtn} onClick={handleOpenTab}>
-            <ExternalLink size={14} />
-            <span>Open in New Tab</span>
-          </button>
         </div>
       </motion.div>
     </motion.div>

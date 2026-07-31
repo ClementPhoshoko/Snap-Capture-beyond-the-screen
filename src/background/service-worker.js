@@ -5,10 +5,13 @@ import { buildPayload } from "./services/payloadBuilder.js";
 import { generateProject, fixDiscrepancies, testConnection } from "./services/geminiService.js";
 import { compareScreenshots, generateDiffReport, calculateSimilarity } from "./services/visualVerifier.js";
 import { exportProject } from "./services/projectExporter.js";
+import { getExtractDesignStatus, recordDesignExtract, saveExtractDesignStatus } from "../shared/storage.js";
+import { saveDesignExtractArchive } from "../shared/designArchive.js";
 
 const CONTENT_SCRIPT = "content/index.js";
 const captureTimes = new Map();
 let activeCaptureTabId = null;
+let activeExtractPromise = null;
 
 async function getActiveTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -32,6 +35,37 @@ async function ensureContentScript(tabId) {
 
 function sendToPopup(message) {
   chrome.runtime.sendMessage(message).catch(() => {});
+}
+
+async function updateExtractStatus(status) {
+  await saveExtractDesignStatus(status).catch(() => {});
+}
+
+function sendExtractProgress(stage, percent, detail = {}) {
+  const payload = { stage, percent, ...detail };
+  updateExtractStatus({ state: "running", payload });
+  sendToPopup(buildExtractDesignProgress(stage, percent, detail));
+}
+
+function buildStoredExtractResult(result) {
+  return {
+    projectName: result.projectName,
+    similarityScore: result.similarityScore,
+    files: result.files,
+    size: result.size,
+    format: result.format,
+    archiveId: result.archiveId,
+    capturedAt: result.capturedAt,
+    extractionData: result.extractionData,
+  };
+}
+
+function getDomain(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
 }
 
 async function handleStartCapture(payload) {
@@ -91,40 +125,88 @@ function withTimeout(fn, ms, label) {
     .finally(() => clearTimeout(timer));
 }
 
+async function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function captureDesignScreenshots(tab) {
+  const planResponse = await chrome.tabs.sendMessage(tab.id, { type: "SNAP/EXTRACT_DESIGN_SCREENSHOT_PLAN" });
+  if (!planResponse?.success) throw new Error(planResponse?.error || "Screenshot planning failed");
+
+  const { page, originalScrollY, positions } = planResponse.data;
+  const screenshots = [];
+  try {
+    for (let index = 0; index < positions.length; index += 1) {
+      const y = positions[index];
+      const scrollResponse = await chrome.tabs.sendMessage(tab.id, {
+        type: "SNAP/EXTRACT_DESIGN_SCROLL_TO",
+        payload: { y },
+      });
+      if (!scrollResponse?.success) throw new Error(scrollResponse?.error || "Could not scroll page for extraction");
+
+      await delay(CAPTURE_INTERVAL_MS);
+      const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "jpeg", quality: 30 });
+      screenshots.push({
+        dataUrl,
+        y: scrollResponse.data?.y ?? y,
+        label: index === 0 ? "top" : index === positions.length - 1 ? "bottom" : `middle-${index}`,
+        viewport: { width: page.vpWidth, height: page.vpHeight },
+        pageHeight: page.scrollHeight,
+      });
+    }
+  } finally {
+    chrome.tabs.sendMessage(tab.id, {
+      type: "SNAP/EXTRACT_DESIGN_RESTORE_SCROLL",
+      payload: { y: originalScrollY || 0 },
+    }).catch(() => {});
+  }
+  return screenshots;
+}
+
 async function handleExtractDesign() {
+  if (activeExtractPromise) return activeExtractPromise;
+
+  activeExtractPromise = runExtractDesign()
+    .finally(() => {
+      activeExtractPromise = null;
+    });
+  return activeExtractPromise;
+}
+
+async function runExtractDesign() {
   const tab = await getActiveTab();
   if (!tab) throw new Error("No active tab found");
   if (!isInjectable(tab)) {
     throw new Error("Extraction requires an http(s) webpage. Open a regular page and try again.");
   }
 
-  sendToPopup(buildExtractDesignProgress("capture", 5, { message: "Capturing full-page screenshot" }));
-
-  const imageData = await chrome.tabs.captureVisibleTab(tab.windowId, { format: "jpeg", quality: 30 });
-
-  sendToPopup(buildExtractDesignProgress("dom", 10, { message: "Analyzing page structure" }));
+  sendExtractProgress("dom", 5, { message: "Preparing page analysis" });
   await ensureContentScript(tab.id);
+
+  sendExtractProgress("capture", 8, { message: "Capturing visual references" });
+  const screenshots = await captureDesignScreenshots(tab);
 
   const extResponse = await chrome.tabs.sendMessage(tab.id, { type: "SNAP/EXTRACT_DESIGN_CONTENT" });
   if (!extResponse?.success) throw new Error(extResponse?.error || "DOM extraction failed");
   const extractionData = extResponse.data;
 
-  sendToPopup(buildExtractDesignProgress("styles", 18, { message: "Collecting computed styles" }));
-  sendToPopup(buildExtractDesignProgress("css-vars", 22, { message: "Extracting design tokens" }));
-  sendToPopup(buildExtractDesignProgress("fonts", 25, { message: "Identifying typography" }));
-  sendToPopup(buildExtractDesignProgress("images", 28, { message: "Collecting media assets" }));
-  sendToPopup(buildExtractDesignProgress("svgs", 31, { message: "Extracting vector graphics" }));
-  sendToPopup(buildExtractDesignProgress("icons", 34, { message: "Collecting icon assets" }));
-  sendToPopup(buildExtractDesignProgress("layout", 38, { message: "Detecting page layout" }));
-  sendToPopup(buildExtractDesignProgress("spacing", 42, { message: "Measuring gaps and alignment" }));
-  sendToPopup(buildExtractDesignProgress("assets", 46, { message: "Organizing collected assets" }));
+  sendExtractProgress("styles", 18, { message: "Collecting computed styles" });
+  sendExtractProgress("css-vars", 22, { message: "Extracting design tokens" });
+  sendExtractProgress("fonts", 25, { message: "Identifying typography" });
+  sendExtractProgress("images", 28, { message: "Collecting media assets" });
+  sendExtractProgress("svgs", 31, { message: "Extracting vector graphics" });
+  sendExtractProgress("icons", 34, { message: "Collecting icon assets" });
+  sendExtractProgress("layout", 38, { message: "Detecting page layout" });
+  sendExtractProgress("spacing", 42, { message: "Measuring gaps and alignment" });
+  sendExtractProgress("assets", 46, { message: "Organizing collected assets" });
 
-  extractionData.screenshot = imageData;
+  extractionData.screenshot = screenshots[0]?.dataUrl || "";
+  extractionData.screenshots = screenshots;
 
-  sendToPopup(buildExtractDesignProgress("payload", 50, { message: "Preparing AI payload" }));
+  sendExtractProgress("payload", 50, { message: "Preparing AI payload" });
   const payload = buildPayload(extractionData);
 
-  sendToPopup(buildExtractDesignProgress("generate", 55, { message: "AI reconstructing project" }));
+  sendExtractProgress("generate", 55, { message: "AI reconstructing project" });
   const generatedProject = await withTimeout(
     (signal) => generateProject(payload, null, signal),
     180000,
@@ -133,14 +215,14 @@ async function handleExtractDesign() {
     throw new Error(`AI generation failed: ${err.message}`);
   });
 
-  sendToPopup(buildExtractDesignProgress("verify", 75, { message: "Checking visual accuracy" }));
+  sendExtractProgress("verify", 75, { message: "Checking visual accuracy" });
   const diffReport = generateDiffReport(payload, generatedProject);
   let similarityScore = calculateSimilarity(payload, generatedProject);
   let currentProject = generatedProject;
 
-  const MAX_ITERATIONS = 3;
+  const MAX_ITERATIONS = 1;
   for (let i = 0; i < MAX_ITERATIONS && similarityScore < 95; i++) {
-    sendToPopup(buildExtractDesignProgress("improve", 80 + i * 5, { message: `Improving iteration ${i + 1} (${similarityScore}%)` }));
+    sendExtractProgress("improve", 80 + i * 5, { message: `Improving iteration ${i + 1} (${similarityScore}%)` });
     currentProject = await withTimeout(
       (signal) => fixDiscrepancies(payload, currentProject, diffReport, null, signal),
       120000,
@@ -153,12 +235,16 @@ async function handleExtractDesign() {
     similarityScore = Math.max(similarityScore, currentProject.similarityScore);
   }
 
-  sendToPopup(buildExtractDesignProgress("export", 95, { message: "Packaging project files" }));
+  currentProject = { ...currentProject, sourceScreenshots: screenshots };
+
+  sendExtractProgress("export", 95, { message: "Packaging project files" });
   const exportResult = await exportProject(currentProject, "react");
 
   const result = {
     ...exportResult,
     similarityScore,
+    files: currentProject.files?.length || 0,
+    capturedAt: new Date().toISOString(),
     extractionData: {
       domElements: extractionData.dom?.tagCount || 0,
       stylesCollected: extractionData.computedStyles ? Object.keys(extractionData.computedStyles).length : 0,
@@ -168,6 +254,17 @@ async function handleExtractDesign() {
     },
   };
 
+  const archiveId = crypto.randomUUID();
+  result.archiveId = archiveId;
+  await saveDesignExtractArchive(archiveId, exportResult.blob);
+  await recordDesignExtract(result, {
+    title: tab.title,
+    url: tab.url,
+    domain: getDomain(tab.url),
+    favicon: tab.favIconUrl,
+  }, archiveId);
+
+  await updateExtractStatus({ state: "complete", result: buildStoredExtractResult(result) });
   sendToPopup(buildExtractDesignProgress("export", 100, { message: "Done" }));
   sendToPopup(buildExtractDesignComplete(result));
 
@@ -180,7 +277,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     Promise.resolve().then(work).then(sendResponse).catch((error) => {
       const result = { success: false, error: error.message || "Unexpected extension error" };
       if (message.type === MessageType.START_CAPTURE) sendToPopup(buildError("CAPTURE_FAILED", result.error));
-      if (message.type === "SNAP/EXTRACT_DESIGN") sendToPopup(buildExtractDesignError("EXTRACT_FAILED", result.error));
+      if (message.type === "SNAP/EXTRACT_DESIGN") {
+        updateExtractStatus({ state: "error", error: { code: "EXTRACT_FAILED", message: result.error } });
+        sendToPopup(buildExtractDesignError("EXTRACT_FAILED", result.error));
+      }
       sendResponse(result);
     });
     return true;
@@ -197,6 +297,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       return respond(() => handleDownload(message.payload));
     case "SNAP/EXTRACT_DESIGN":
       return respond(() => handleExtractDesign());
+    case "SNAP/EXTRACT_DESIGN_STATUS":
+      return respond(async () => ({ success: true, data: await getExtractDesignStatus() }));
     case "SNAP/AI_CONFIG_TEST":
       return respond(() => testConnection());
     case MessageType.CAPTURE_PROGRESS:

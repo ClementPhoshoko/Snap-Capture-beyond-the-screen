@@ -1,4 +1,6 @@
 import { startCapture, cancelCapture } from "./captureManager.js";
+import { analyzePage } from "./pageAnalyzer.js";
+import { scrollTo, restoreScrollPosition, getScrollPosition, delay } from "./scrollController.js";
 import { extractDOM } from "./extractors/domExtractor.js";
 import { extractComputedStyles, extractCSSVariables, extractFonts } from "./extractors/styleExtractor.js";
 import { analyzeLayout } from "./extractors/layoutAnalyzer.js";
@@ -14,6 +16,38 @@ function extractAll() {
     layout: analyzeLayout(),
     assets: collectAssets(),
   };
+}
+
+function getExtractScreenshotPlan() {
+  const page = analyzePage();
+  const maxY = Math.max(0, page.scrollHeight - page.vpHeight);
+  const ratios = page.scrollHeight <= page.vpHeight * 1.5
+    ? [0]
+    : page.scrollHeight <= page.vpHeight * 3
+      ? [0, 1]
+      : [0, 0.33, 0.66, 1];
+  const seen = new Set();
+  const positions = ratios
+    .map((ratio) => Math.round(maxY * ratio))
+    .filter((y) => {
+      const bucket = Math.round(y / Math.max(1, page.vpHeight / 2));
+      if (seen.has(bucket)) return false;
+      seen.add(bucket);
+      return true;
+    });
+
+  return {
+    page,
+    originalScrollY: getScrollPosition(),
+    positions,
+  };
+}
+
+async function settleForExtract() {
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  if (document.fonts?.ready) await Promise.race([document.fonts.ready, delay(800)]);
+  await delay(200);
 }
 
 if (!globalThis.__akovoSnapControllerInstalled) {
@@ -37,6 +71,26 @@ if (!globalThis.__akovoSnapControllerInstalled) {
       } catch (err) {
         sendResponse({ success: false, error: err.message });
       }
+      return true;
+    }
+    if (message.type === "SNAP/EXTRACT_DESIGN_SCREENSHOT_PLAN") {
+      try {
+        sendResponse({ success: true, data: getExtractScreenshotPlan() });
+      } catch (err) {
+        sendResponse({ success: false, error: err.message });
+      }
+      return true;
+    }
+    if (message.type === "SNAP/EXTRACT_DESIGN_SCROLL_TO") {
+      scrollTo(message.payload?.y || 0);
+      settleForExtract()
+        .then(() => sendResponse({ success: true, data: { y: getScrollPosition() } }))
+        .catch((err) => sendResponse({ success: false, error: err.message }));
+      return true;
+    }
+    if (message.type === "SNAP/EXTRACT_DESIGN_RESTORE_SCROLL") {
+      restoreScrollPosition(message.payload?.y || 0);
+      sendResponse({ success: true });
       return true;
     }
     if (message.type !== MessageType.START_CAPTURE) return;

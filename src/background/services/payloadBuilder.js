@@ -1,6 +1,7 @@
 export function buildPayload(extractionData) {
   const {
     screenshot,
+    screenshots,
     dom,
     computedStyles,
     cssVariables,
@@ -11,6 +12,13 @@ export function buildPayload(extractionData) {
 
   const payload = {
     screenshot,
+    screenshots: (screenshots || []).slice(0, 4).map((shot) => shot.dataUrl),
+    visualReferences: (screenshots || []).slice(0, 4).map((shot) => ({
+      label: shot.label,
+      y: shot.y,
+      viewport: shot.viewport,
+      pageHeight: shot.pageHeight,
+    })),
     dom: {
       tagCount: dom?.tagCount || 0,
       semanticElements: (dom?.semanticElements || []).slice(0, 30),
