@@ -29,6 +29,7 @@ import {
   sendToBackground,
   onMessage,
   offMessage,
+  buildCancelExtractDesign,
 } from "../../../shared/messages";
 import { clearExtractDesignStatus } from "../../../shared/storage";
 import { getDesignExtractArchive } from "../../../shared/designArchive";
@@ -66,6 +67,8 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
   const handleClose = useCallback(() => {
     if (completed || error) {
       clearExtractDesignStatus().catch(() => {});
+    } else {
+      sendToBackground(buildCancelExtractDesign()).catch(() => {});
     }
     onClose?.();
   }, [completed, error, onClose]);
@@ -311,7 +314,7 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
       transition={{ duration: 0.25 }}
     >
       <div className={styles.header}>
-        <button className={styles.headerBtn} onClick={onClose} aria-label="Cancel">
+        <button className={styles.headerBtn} onClick={handleClose} aria-label="Cancel">
           <ArrowLeft size={18} />
         </button>
         <div className={styles.headerCenter}>
@@ -328,7 +331,7 @@ export default function ExtractDesignProgress({ onBack, onClose, onComplete }) {
             <span className={styles.headerSubtitle}>Extract Design</span>
           </div>
         </div>
-        <button className={styles.headerBtn} onClick={onClose} aria-label="Close">
+        <button className={styles.headerBtn} onClick={handleClose} aria-label="Close">
           <X size={18} />
         </button>
       </div>

@@ -175,6 +175,7 @@ async function cascadeRequest(modelBodyFn, signal) {
         return result;
       }
     } catch (err) {
+      if (err?.name === "AbortError") throw err;
       errors.push(`${model} (interactions): ${err.message}`);
     }
 
@@ -196,6 +197,7 @@ async function cascadeRequest(modelBodyFn, signal) {
         return result;
       }
     } catch (gcErr) {
+      if (gcErr?.name === "AbortError") throw gcErr;
       errors.push(`${model} (generateContent): ${gcErr.message}`);
     }
   }

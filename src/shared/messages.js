@@ -25,6 +25,7 @@ export const MessageType = Object.freeze({
   EXTRACT_DESIGN_PROGRESS: "SNAP/EXTRACT_DESIGN_PROGRESS",
   EXTRACT_DESIGN_COMPLETE: "SNAP/EXTRACT_DESIGN_COMPLETE",
   EXTRACT_DESIGN_ERROR: "SNAP/EXTRACT_DESIGN_ERROR",
+  EXTRACT_DESIGN_CANCEL: "SNAP/EXTRACT_DESIGN_CANCEL",
   AI_CONFIG_SAVE: "SNAP/AI_CONFIG_SAVE",
   AI_CONFIG_GET: "SNAP/AI_CONFIG_GET",
   AI_CONFIG_TEST: "SNAP/AI_CONFIG_TEST",
@@ -118,6 +119,10 @@ export function buildExtractDesignError(code, message, recoverable = false) {
     type: MessageType.EXTRACT_DESIGN_ERROR,
     payload: { code, message, recoverable },
   };
+}
+
+export function buildCancelExtractDesign() {
+  return { type: MessageType.EXTRACT_DESIGN_CANCEL, payload: {} };
 }
 
 // ─── Send helpers ────────────────────────────────────────────
