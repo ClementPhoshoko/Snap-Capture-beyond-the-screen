@@ -3,7 +3,8 @@
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--popup-padding);
-  min-height: var(--popup-min-height);
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -181,8 +182,9 @@
   backdrop-filter: blur(var(--glass-blur-md));
   -webkit-backdrop-filter: blur(var(--glass-blur-md));
   padding: var(--card-padding);
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 0;
+  max-height: min(280px, 42vh);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) transparent;

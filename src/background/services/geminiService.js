@@ -312,12 +312,21 @@ export async function generateProject(payload, onProgress, signal) {
 
 Text policy: Transcribe SHORT UI text exactly — headings, buttons, links, nav items, labels, form placeholders, footer text. For LONG body copy (paragraphs, article text, descriptions over ~120 chars), do NOT transcribe it — use a skeleton placeholder component instead (e.g. <Skeleton rows={n} />) whose height matches the original block. This preserves the visual design while keeping output compact.
 
-Rules: React + CSS Modules, responsive, accessible, no inline styles, clean naming, reusable components.
+Rules: React + plain CSS, responsive, accessible, no inline styles, clean naming, reusable components.
+Use this simple project shape:
+- App.jsx imports "./App.css"
+- App.css contains regular class selectors
+- index.jsx only mounts <App />
+- Use plain className="..." strings. Do not use CSS Modules or className={styles.name}.
 
 Output JSON:
 {
   "projectName": "extracted-design",
-  "files": [{ "path": "src/App.jsx", "content": "..." }],
+  "files": [
+    { "path": "App.jsx", "content": "..." },
+    { "path": "App.css", "content": "..." },
+    { "path": "index.jsx", "content": "..." }
+  ],
   "assets": [{ "path": "public/img.png", "dataUrl": "..." }],
   "similarityScore": 95
 }`;

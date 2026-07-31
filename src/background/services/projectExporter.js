@@ -2,26 +2,18 @@ import JSZip from "jszip";
 
 export async function exportProject(generatedProject, format = "react") {
   const zip = new JSZip();
-  const project = generatedProject.projectName || "extracted-design";
+  const project = sanitizePackageName(generatedProject.projectName || "extracted-design");
+  const files = normalizeProjectFiles(generatedProject.files || []);
 
   if (format === "react") {
-    zip.file("package.json", JSON.stringify({
-      name: project,
-      version: "1.0.0",
-      private: true,
-      scripts: { start: "react-scripts start", build: "react-scripts build" },
-      dependencies: { react: "^19.0.0", "react-dom": "^19.0.0", "react-scripts": "5.0.1" },
-    }, null, 2));
-
-    zip.file("public/index.html", `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${project}</title></head><body><div id="root"></div></body></html>`);
+    zip.file("package.json", JSON.stringify(buildVitePackage(project), null, 2));
+    zip.file("index.html", buildIndexHtml(project));
   } else {
     zip.file("index.html", `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${project}</title><link rel="stylesheet" href="styles.css"/></head><body><div id="root"></div><script src="script.js"></script></body></html>`);
   }
 
-  if (generatedProject.files) {
-    for (const file of generatedProject.files) {
-      zip.file(file.path, file.content);
-    }
+  for (const file of files) {
+    zip.file(file.path, file.content);
   }
 
   if (generatedProject.assets) {
@@ -75,6 +67,159 @@ export async function exportProject(generatedProject, format = "react") {
     format,
     report: extractionReport,
   };
+}
+
+function buildVitePackage(name) {
+  return {
+    name,
+    private: true,
+    version: "1.0.0",
+    type: "module",
+    scripts: {
+      dev: "vite",
+      build: "vite build --base ./",
+      preview: "vite preview",
+    },
+    dependencies: {
+      react: "^19.1.0",
+      "react-dom": "^19.1.0",
+    },
+    devDependencies: {
+      "@vitejs/plugin-react": "^4.3.4",
+      vite: "^6.3.5",
+    },
+  };
+}
+
+function buildIndexHtml(project) {
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${escapeHtml(project)}</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.jsx"></script>
+  </body>
+</html>`;
+}
+
+function normalizeProjectFiles(files) {
+  const map = new Map();
+  for (const file of files) {
+    if (!file?.path || typeof file.content !== "string") continue;
+    const normalizedPath = file.path.replace(/\\/g, "/").replace(/^\/+/, "");
+    map.set(normalizedPath, file.content);
+  }
+
+  const moduleCssPath = [...map.keys()].find((path) => /(^|\/)App\.module\.css$/i.test(path));
+  if (moduleCssPath && !map.has("App.css")) {
+    map.set("App.css", map.get(moduleCssPath));
+    map.delete(moduleCssPath);
+  }
+
+  let app = map.get("App.jsx") || map.get("src/App.jsx") || fallbackApp();
+  app = normalizeAppImports(app);
+  map.set("App.jsx", app);
+  map.delete("src/App.jsx");
+
+  if (!map.has("App.css")) {
+    const srcCss = map.get("src/App.css");
+    map.set("App.css", srcCss || fallbackCss());
+    map.delete("src/App.css");
+  }
+
+  if (!map.has("index.jsx")) {
+    const srcIndex = map.get("src/index.jsx");
+    map.set("index.jsx", srcIndex ? normalizeIndexImports(srcIndex) : buildIndexJsx());
+    map.delete("src/index.jsx");
+  }
+
+  map.delete("public/index.html");
+  map.delete("index.html");
+  map.delete("package.json");
+
+  return [...map.entries()].map(([path, content]) => ({ path, content }));
+}
+
+function normalizeAppImports(content) {
+  let next = content
+    .replace(/import\s+styles\s+from\s+["']\.\/App\.module\.css["'];?/g, 'import "./App.css";')
+    .replace(/import\s+["']\.\/App\.module\.css["'];?/g, 'import "./App.css";');
+
+  if (!/import\s+["']\.\/App\.css["'];?/.test(next)) {
+    next = next.replace(/(import[\s\S]*?;\s*)/, `$1\nimport "./App.css";\n`);
+    if (!/import\s+["']\.\/App\.css["'];?/.test(next)) {
+      next = `import "./App.css";\n${next}`;
+    }
+  }
+
+  next = next
+    .replace(/className=\{styles\.([A-Za-z0-9_$-]+)\}/g, 'className="$1"')
+    .replace(/className=\{styles\[['"]([^'"]+)['"]\]\}/g, 'className="$1"')
+    .replace(/className=\{`([^`]*?)\$\{styles\.([A-Za-z0-9_$-]+)\}([^`]*?)`\}/g, 'className="$1$2$3"');
+
+  return next;
+}
+
+function normalizeIndexImports(content) {
+  return content
+    .replace(/from\s+["']\.\/App\.jsx["']/g, 'from "./App.jsx"')
+    .replace(/from\s+["']\.\/src\/App\.jsx["']/g, 'from "./App.jsx"')
+    .replace(/from\s+["']\.\/App["']/g, 'from "./App.jsx"')
+    .replace(/from\s+["']\.\/src\/App["']/g, 'from "./App.jsx"');
+}
+
+function buildIndexJsx() {
+  return `import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);
+`;
+}
+
+function fallbackApp() {
+  return `import React from "react";
+import "./App.css";
+
+export default function App() {
+  return <main className="app">Extracted design</main>;
+}
+`;
+}
+
+function fallbackCss() {
+  return `.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: system-ui, sans-serif;
+}
+`;
+}
+
+function sanitizePackageName(name) {
+  return String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "extracted-design";
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function blobToDataURL(blob) {

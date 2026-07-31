@@ -87,7 +87,7 @@
 
   /* Layout */
   --popup-width: 360px;
-  --popup-min-height: 480px;
+  --popup-min-height: 600px;
   --popup-padding: var(--space-5);
 
   /* Buttons */
