@@ -25,6 +25,8 @@ export const FORMAT_DETAILS = Object.freeze({
   webp: { mime: "image/webp", extension: "webp" },
 });
 
+export const GEMINI_ORIGIN = "https://generativelanguage.googleapis.com/*";
+
 export const AI_DEFAULT_SETTINGS = Object.freeze({
   apiKey: "",
   provider: "gemini",

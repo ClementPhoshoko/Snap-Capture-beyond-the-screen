@@ -7,7 +7,7 @@ import CaptureComplete from "./pages/CaptureComplete";
 import Settings from "./pages/Settings";
 import History from "./pages/History";
 import ExtractDesignProgress from "./pages/ExtractDesignProgress";
-import { DEFAULT_SETTINGS } from "../shared/constants";
+import { DEFAULT_SETTINGS, GEMINI_ORIGIN } from "../shared/constants";
 import { getExtractDesignStatus, getSettings, saveSettings, resetSettings, recordCapture } from "../shared/storage";
 
 const accentValues = {
@@ -78,7 +78,19 @@ function App() {
     root.style.setProperty("--text-accent", acc.light);
   }, [captureSettings.accent]);
 
-  const handleExtractDesign = () => {
+  const handleExtractDesign = async () => {
+    try {
+      const hasPermission = await chrome.permissions.contains({ origins: [GEMINI_ORIGIN] });
+      if (!hasPermission) {
+        const granted = await chrome.permissions.request({ origins: [GEMINI_ORIGIN] });
+        if (!granted) {
+          alert("Extract Design needs permission to contact Google's Gemini API. Grant it when prompted to enable AI design extraction.");
+          return;
+        }
+      }
+    } catch {
+      // permissions API unavailable; let the extraction surface any error instead
+    }
     setPage("extract");
   };
 

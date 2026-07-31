@@ -7,6 +7,7 @@ import SettingsSelect from "../../components/SettingsSelect";
 import ThemeSelector from "../../components/ThemeSelector";
 import AccentPicker from "../../components/AccentPicker";
 import { getAIConfig, saveAIConfig } from "../../../shared/storage";
+import { GEMINI_ORIGIN } from "../../../shared/constants";
 import styles from "./Settings.module.css";
 
 const pageVariants = {
@@ -85,6 +86,19 @@ export default function Settings({ onBack, onClose, theme, accent, onThemeChange
         setTestResult({ success: false, error: "No API key saved" });
         setTestStatus("error");
         return;
+      }
+      try {
+        const hasPermission = await chrome.permissions.contains({ origins: [GEMINI_ORIGIN] });
+        if (!hasPermission) {
+          const granted = await chrome.permissions.request({ origins: [GEMINI_ORIGIN] });
+          if (!granted) {
+            setTestResult({ success: false, error: "Permission to contact Google's Gemini API was denied. Grant it when prompted." });
+            setTestStatus("error");
+            return;
+          }
+        }
+      } catch {
+        // permissions API unavailable; proceed and let the request surface the error
       }
       const base = "https://generativelanguage.googleapis.com/v1beta";
       const revision = "2026-05-20";
