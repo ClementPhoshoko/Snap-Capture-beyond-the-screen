@@ -1,8 +1,9 @@
 .layout {
   width: var(--popup-width);
-  min-height: var(--popup-min-height);
+  height: var(--popup-min-height);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .constrained {
@@ -15,4 +16,5 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  overflow: hidden;
 }

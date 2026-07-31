@@ -40,8 +40,62 @@ export default function HistoryCard({
   const handleDelete = useCallback((e) => { e.stopPropagation(); setMenuOpen(false); onDelete?.(id); }, [id, onDelete]);
   const handleShare = useCallback((e) => { e.stopPropagation(); setMenuOpen(false); onShare?.(id, thumbnail, url); }, [id, thumbnail, url, onShare]);
 
+  const imageActions = (
+    <div className={styles.actions}>
+      <motion.button
+        className={styles.actionBtn}
+        whileHover={{ scale: 1.1, y: -1 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.12 }}
+        onClick={(e) => { e.stopPropagation(); onOpen?.(e); }}
+        aria-label="Open original page"
+      >
+        <ExternalLink size={14} />
+      </motion.button>
+      <motion.button
+        className={styles.actionBtn}
+        whileHover={{ scale: 1.1, y: -1 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.12 }}
+        onClick={handleDownload}
+        aria-label="Download image"
+      >
+        <Download size={14} />
+      </motion.button>
+      <motion.button
+        className={styles.actionBtn}
+        whileHover={{ scale: 1.1, y: -1 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.12 }}
+        onClick={handleCopy}
+        aria-label="Copy image to clipboard"
+      >
+        <Copy size={14} />
+      </motion.button>
+      <div className={styles.menuWrap}>
+        <motion.button
+          ref={btnRef}
+          className={styles.actionBtn}
+          whileHover={{ scale: 1.1, y: -1 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.12 }}
+          onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
+          aria-label="More actions"
+        >
+          <EllipsisVertical size={14} />
+        </motion.button>
+        {menuOpen && (
+          <div ref={menuRef} className={styles.dropdown}>
+            <button className={styles.dropdownItem} onClick={handleDelete}><Trash2 size={14} /> Delete</button>
+            <button className={styles.dropdownItem} onClick={handleShare}><Share2 size={14} /> Share</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${isZipCard ? styles.zipCard : styles.imageCard}`}>
       <div className={styles.thumbnail}>
         {thumbnail ? (
           <img src={thumbnail} alt={title} className={styles.thumbImg} loading="lazy" />
@@ -70,10 +124,11 @@ export default function HistoryCard({
         <span className={styles.domain}>{domain}</span>
         <span className={styles.meta}>{resolution} &middot; {format} &middot; {size}</span>
         <span className={styles.time}>{time}</span>
+        {!isZipCard && imageActions}
       </div>
 
-      <div className={styles.actions}>
-        {isZipCard ? (
+      {isZipCard && (
+        <div className={styles.actions}>
           <>
             <motion.button
               className={styles.actionBtn}
@@ -98,60 +153,8 @@ export default function HistoryCard({
               <Trash2 size={14} />
             </motion.button>
           </>
-        ) : (
-          <>
-            <motion.button
-              className={styles.actionBtn}
-              whileHover={{ scale: 1.1, y: -1 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.12 }}
-              onClick={(e) => { e.stopPropagation(); onOpen?.(e); }}
-              aria-label="Open original page"
-            >
-              <ExternalLink size={14} />
-            </motion.button>
-            <motion.button
-              className={styles.actionBtn}
-              whileHover={{ scale: 1.1, y: -1 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.12 }}
-              onClick={handleDownload}
-              aria-label="Download image"
-            >
-              <Download size={14} />
-            </motion.button>
-            <motion.button
-              className={styles.actionBtn}
-              whileHover={{ scale: 1.1, y: -1 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.12 }}
-              onClick={handleCopy}
-              aria-label="Copy image to clipboard"
-            >
-              <Copy size={14} />
-            </motion.button>
-            <div className={styles.menuWrap}>
-              <motion.button
-                ref={btnRef}
-                className={styles.actionBtn}
-                whileHover={{ scale: 1.1, y: -1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.12 }}
-                onClick={(e) => { e.stopPropagation(); setMenuOpen((v) => !v); }}
-                aria-label="More actions"
-              >
-                <EllipsisVertical size={14} />
-              </motion.button>
-              {menuOpen && (
-                <div ref={menuRef} className={styles.dropdown}>
-                  <button className={styles.dropdownItem} onClick={handleDelete}><Trash2 size={14} /> Delete</button>
-                  <button className={styles.dropdownItem} onClick={handleShare}><Share2 size={14} /> Share</button>
-                </div>
-              )}
-            </div>
-          </>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

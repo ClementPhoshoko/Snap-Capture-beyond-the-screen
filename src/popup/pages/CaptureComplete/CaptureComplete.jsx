@@ -127,7 +127,6 @@ export default function CaptureCompleteScreen({ onBack, onClose, captureResult }
         <div className={styles.actions}>
           <ActionCard icon={Download} label="Download" onClick={handleDownload} />
           <ActionCard icon={Clipboard} label="Copy" onClick={handleCopy} />
-          <ActionCard icon={ExternalLink} label="Open" onClick={handleOpenTab} />
           <ActionCard icon={Camera} label="New" onClick={onBack} />
         </div>
       </motion.div>

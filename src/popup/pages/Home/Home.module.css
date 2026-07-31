@@ -22,4 +22,11 @@
 .actionRow > * {
   flex: 1;
   min-width: 0;
+  height: var(--btn-height-sm);
+  min-height: var(--btn-height-sm);
+}
+
+.actionRow button {
+  height: 100%;
+  min-height: 0;
 }
