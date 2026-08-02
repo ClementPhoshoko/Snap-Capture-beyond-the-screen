@@ -107,7 +107,7 @@ function buildIndexHtml(project) {
 </html>`;
 }
 
-function normalizeProjectFiles(files) {
+export function normalizeProjectFiles(files) {
   const map = new Map();
   for (const file of files) {
     const content = getFileContent(file);
@@ -136,9 +136,11 @@ function normalizeProjectFiles(files) {
     map.set("App.css", "");
   }
 
-  if (!map.has("index.jsx")) {
+  if (map.has("index.jsx")) {
+    map.set("index.jsx", ensureAppImport(map.get("index.jsx")));
+  } else {
     const srcIndex = map.get("src/index.jsx");
-    map.set("index.jsx", srcIndex ? normalizeIndexImports(srcIndex) : buildIndexJsx());
+    map.set("index.jsx", srcIndex ? ensureAppImport(srcIndex) : buildIndexJsx());
     map.delete("src/index.jsx");
   }
 
@@ -169,7 +171,7 @@ function normalizeAppImports(content) {
   return next;
 }
 
-function smokeTestProject(files) {
+export function smokeTestProject(files) {
   const map = new Map(files.map((file) => [file.path, file.content]));
   const app = map.get("App.jsx") || "";
   const css = map.get("App.css");
@@ -180,7 +182,10 @@ function smokeTestProject(files) {
   if (!/import\s+["']\.\/App\.css["'];?/.test(app)) failures.push('App.jsx must import "./App.css"');
   if (/\bstyles\./.test(app)) failures.push("App.jsx still contains CSS module styles.* references");
   if (css == null) failures.push("App.css is missing");
-  if (!/from\s+["']\.\/App\.jsx["']/.test(index)) failures.push('index.jsx must import "./App.jsx"');
+  if (!/from\s*["']\.\/App\.jsx["']/.test(index)) {
+    const imports = (index.match(/^import\s+[^\n]*$/gm) || []).slice(0, 6).join(" | ");
+    failures.push(`index.jsx must import "./App.jsx"${imports ? ` (found: ${imports})` : ""}`);
+  }
   if (!/createRoot\s*\(/.test(index)) failures.push("index.jsx must mount the React app");
 
   if (failures.length) {
@@ -204,11 +209,18 @@ function normalizePath(path) {
 }
 
 function normalizeIndexImports(content) {
-  return content
-    .replace(/from\s+["']\.\/App\.jsx["']/g, 'from "./App.jsx"')
-    .replace(/from\s+["']\.\/src\/App\.jsx["']/g, 'from "./App.jsx"')
-    .replace(/from\s+["']\.\/App["']/g, 'from "./App.jsx"')
-    .replace(/from\s+["']\.\/src\/App["']/g, 'from "./App.jsx"');
+  return content.replace(
+    /from\s*["'](?:\.\.?\/)*(?:src\/)?[Aa]pp(?:\.jsx?)?["']/g,
+    'from "./App.jsx"'
+  );
+}
+
+function ensureAppImport(content) {
+  let next = normalizeIndexImports(content);
+  if (!/from\s*["']\.\/App\.jsx["']/.test(next)) {
+    next = `import App from "./App.jsx";\n${next}`;
+  }
+  return next;
 }
 
 function buildIndexJsx() {
