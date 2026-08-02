@@ -109,9 +109,10 @@ function buildIndexHtml(project) {
 function normalizeProjectFiles(files) {
   const map = new Map();
   for (const file of files) {
-    if (!file?.path || typeof file.content !== "string") continue;
-    const normalizedPath = file.path.replace(/\\/g, "/").replace(/^\/+/, "");
-    map.set(normalizedPath, file.content);
+    const content = getFileContent(file);
+    if (!file?.path || typeof content !== "string") continue;
+    const normalizedPath = normalizePath(file.path);
+    map.set(normalizedPath, content);
   }
 
   const moduleCssPath = [...map.keys()].find((path) => /(^|\/)App\.module\.css$/i.test(path));
@@ -120,15 +121,18 @@ function normalizeProjectFiles(files) {
     map.delete(moduleCssPath);
   }
 
-  let app = map.get("App.jsx") || map.get("src/App.jsx") || fallbackApp();
+  const appPath = map.has("App.jsx") ? "App.jsx" : [...map.keys()].find((path) => /(^|\/)App\.jsx$/i.test(path));
+  if (!appPath) {
+    throw new Error("AI output did not include App.jsx. Extraction was not packaged to avoid shipping a placeholder project.");
+  }
+
+  let app = map.get(appPath);
   app = normalizeAppImports(app);
   map.set("App.jsx", app);
-  map.delete("src/App.jsx");
+  if (appPath !== "App.jsx") map.delete(appPath);
 
   if (!map.has("App.css")) {
-    const srcCss = map.get("src/App.css");
-    map.set("App.css", srcCss || fallbackCss());
-    map.delete("src/App.css");
+    map.set("App.css", "");
   }
 
   if (!map.has("index.jsx")) {
@@ -164,6 +168,21 @@ function normalizeAppImports(content) {
   return next;
 }
 
+function getFileContent(file) {
+  if (typeof file.content === "string") return file.content;
+  if (typeof file.code === "string") return file.code;
+  if (typeof file.source === "string") return file.source;
+  return null;
+}
+
+function normalizePath(path) {
+  let next = String(path).replace(/\\/g, "/").replace(/^\/+/, "").replace(/^(\.\/)+/, "");
+  if (/\.(jsx?|css)$/i.test(next)) {
+    next = next.replace(/^src\//, "");
+  }
+  return next;
+}
+
 function normalizeIndexImports(content) {
   return content
     .replace(/from\s+["']\.\/App\.jsx["']/g, 'from "./App.jsx"')
@@ -182,27 +201,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <App />
   </React.StrictMode>,
 );
-`;
-}
-
-function fallbackApp() {
-  return `import React from "react";
-import "./App.css";
-
-export default function App() {
-  return <main className="app">Extracted design</main>;
-}
-`;
-}
-
-function fallbackCss() {
-  return `.app {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: system-ui, sans-serif;
-}
 `;
 }
 

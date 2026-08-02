@@ -244,7 +244,7 @@ async function runExtractDesign(signal) {
   let similarityScore = calculateSimilarity(payload, generatedProject);
   let currentProject = generatedProject;
 
-  const MAX_ITERATIONS = 1;
+  const MAX_ITERATIONS = 0;
   for (let i = 0; i < MAX_ITERATIONS && similarityScore < 95; i++) {
     sendExtractProgress("improve", 80 + i * 5, { message: `Improving iteration ${i + 1} (${similarityScore}%)` });
     currentProject = await withTimeout(

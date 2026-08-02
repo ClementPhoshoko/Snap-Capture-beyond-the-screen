@@ -166,20 +166,7 @@ async function cascadeRequest(modelBodyFn, signal) {
   for (const model of modelsToTry) {
     const body = modelBodyFn(model);
 
-    // Try Interactions API first
-    try {
-      const result = await interactionsRequest(model, body, signal);
-      if (result && result._modelNotFound) {
-        errors.push(`${model} (interactions): ${result.message}`);
-      } else {
-        return result;
-      }
-    } catch (err) {
-      if (err?.name === "AbortError") throw err;
-      errors.push(`${model} (interactions): ${err.message}`);
-    }
-
-    // Fallback to generateContent for same model
+    // Prefer generateContent because it supports JSON response hints more consistently.
     try {
       const gcBody = {
         contents: [{ parts: body.input?.parts || [] }],
@@ -199,6 +186,19 @@ async function cascadeRequest(modelBodyFn, signal) {
     } catch (gcErr) {
       if (gcErr?.name === "AbortError") throw gcErr;
       errors.push(`${model} (generateContent): ${gcErr.message}`);
+    }
+
+    // Fallback to Interactions API for endpoints that need it.
+    try {
+      const result = await interactionsRequest(model, body, signal);
+      if (result && result._modelNotFound) {
+        errors.push(`${model} (interactions): ${result.message}`);
+      } else {
+        return result;
+      }
+    } catch (err) {
+      if (err?.name === "AbortError") throw err;
+      errors.push(`${model} (interactions): ${err.message}`);
     }
   }
 
@@ -222,6 +222,43 @@ function extractScreenshotData(dataUrl) {
   const match = dataUrl.match(/^data:(image\/\w+);base64,(.+)$/);
   if (!match) return null;
   return { mimeType: match[1], data: match[2] };
+}
+
+function stripJsonFence(text) {
+  return text
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+}
+
+function parseProjectJson(text) {
+  const cleaned = stripJsonFence(text);
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("Gemini did not return JSON");
+    return JSON.parse(jsonMatch[0]);
+  }
+}
+
+function validateProject(project) {
+  if (!project || typeof project !== "object") {
+    throw new Error("Gemini returned an invalid project payload");
+  }
+  if (!Array.isArray(project.files) || project.files.length === 0) {
+    throw new Error("Gemini returned no project files");
+  }
+  const hasApp = project.files.some((file) => {
+    const path = String(file?.path || "").replace(/\\/g, "/").replace(/^(\.\/)+/, "");
+    const content = file?.content || file?.code || file?.source;
+    return /(^|\/)App\.jsx$/i.test(path) && typeof content === "string" && content.trim();
+  });
+  if (!hasApp) {
+    throw new Error("Gemini returned project files, but none contained App.jsx");
+  }
+  return project;
 }
 
 export async function testConnection() {
@@ -339,11 +376,11 @@ Output JSON:
   const imageParts = (screenshots?.length ? screenshots : [screenshot])
     .map(extractScreenshotData)
     .filter(Boolean)
-    .slice(0, 4);
+    .slice(0, 3);
   const estimated = estimateTokens(userPrompt, imageParts.map((img) => img.data).join(""));
 
-  // truncate text payload if too large (target ~80k tokens, leave room for image + system)
-  const MAX_TEXT_TOKENS = 80000;
+  // Keep room for image input and generated files; oversized context slows output.
+  const MAX_TEXT_TOKENS = 30000;
   if (estimated.textTokens > MAX_TEXT_TOKENS) {
     const maxChars = MAX_TEXT_TOKENS * 4;
     truncateJson(restPayload, maxChars);
@@ -361,7 +398,7 @@ Output JSON:
       input: { parts },
       config: {
         system_instruction: systemInstruction,
-        generation_config: { max_output_tokens: 128000 },
+        generation_config: { max_output_tokens: 32768, responseMimeType: "application/json" },
       },
     }),
     signal,
@@ -370,13 +407,7 @@ Output JSON:
   const text = extractResponseText(data);
   if (!text) throw new Error("Gemini returned an empty response");
 
-  try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) return JSON.parse(jsonMatch[0]);
-    return { projectName: "extracted-design", files: [{ path: "src/App.jsx", content: text }], similarityScore: 70 };
-  } catch {
-    return { projectName: "extracted-design", files: [{ path: "src/App.jsx", content: text }], similarityScore: 70 };
-  }
+  return validateProject(parseProjectJson(text));
 }
 
 export async function fixDiscrepancies(originalPayload, generatedProject, diffReport, onProgress, signal) {
@@ -415,7 +446,7 @@ export async function fixDiscrepancies(originalPayload, generatedProject, diffRe
   const data = await cascadeRequest(
     (model) => ({
       input: { parts: [{ text: JSON.stringify(fixPayload) }] },
-      config: { generation_config: { max_output_tokens: 128000 } },
+      config: { generation_config: { max_output_tokens: 32768, responseMimeType: "application/json" } },
     }),
     signal,
   );
