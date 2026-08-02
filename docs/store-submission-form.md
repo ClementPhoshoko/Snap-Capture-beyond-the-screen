@@ -11,10 +11,10 @@ Text in `>` blocks is ready to paste. Anything marked `[ ]` is a checkbox choice
 > AkovoLabs Snap
 
 **Product URL** — your website (optional but recommended)
-> (add once snap.akovolabs.co.za exists; can be added later)
+> https://snap.akovolabs.co.za
 
 **Privacy policy URL** — REQUIRED
-> (host docs/PRIVACY_POLICY.md somewhere public, e.g. gist, Notion, or later /privacy on your site, then paste the link here)
+> https://snap.akovolabs.co.za/privacy
 
 **Short description** (max 132 chars)
 > Capture full-page screenshots and extract any webpage into a ready-to-run React project with AI.

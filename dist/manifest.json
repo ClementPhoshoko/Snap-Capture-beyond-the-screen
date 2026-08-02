@@ -3,6 +3,7 @@
   "name": "AkovoLabs Snap",
   "version": "1.2.0",
   "author": "Clement Phoshoko",
+  "homepage_url": "https://snap.akovolabs.co.za",
   "description": "Capture full-page screenshots and extract any webpage into a ready-to-run React project with AI.",
   "minimum_chrome_version": "120",
   "permissions": ["activeTab", "scripting", "storage", "downloads"],

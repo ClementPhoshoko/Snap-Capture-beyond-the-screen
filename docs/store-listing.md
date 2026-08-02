@@ -72,7 +72,7 @@ English.
 ## Optional
 
 - Promo video (≤ 200 seconds) showing a full-page capture, then an Extract Design run.
-- Website URL (homepage) — recommended; also required to host the privacy policy.
+- Website URL (homepage): https://snap.akovolabs.co.za — also hosts the privacy policy at /privacy.
 
 ## Permission & data-safety summary (used in the store forms)
 
