@@ -76,7 +76,7 @@ The flagship feature: **turn any webpage into a runnable React project**.
 - **PNG, JPEG, and WebP** export.
 - **Copy to clipboard** — paste straight into Slack, Figma, or a doc.
 - **Download with configurable filenames** — templates like `Snap_title-date-time`, with optional "save as" prompt.
-- **Configurable quality and capture delay** — wait 2–10s for animations or lazy content to settle.
+- **Configurable quality and capture delay** — wait 2–10s for animations or lazy content to settle. Note: the quality setting (**High/Medium/Low**) controls the **lossy compression level** and only affects **JPEG/WebP** output. **PNG is always exported lossless** at full resolution — the quality setting is intentionally ignored for PNG, since a lossless format can't be compressed further without destroying pixels.
 - **Restores the page** — original scroll position and page styles are restored after capture.
 
 ## 🛡 Robustness
@@ -269,6 +269,10 @@ Build the extension.
 npm run build
 ```
 
+> ⚠️ **Always use `npm run build`** — never a bare `vite build`. Snap has two bundles (popup + content script); the build script builds both (`vite build` + `vite.content.config.js`) and then runs a **post-build verification** (`scripts/verify-build.mjs`) that fails loudly if `dist/content/index.js` is missing. A bare `vite build` clears the content-script output via `emptyOutDir: true`, producing a broken extension.
+>
+> After rebuilding, **reload the extension** at `chrome://extensions` (or Ctrl+R on the popup) — a stale loaded bundle can otherwise look like bugs that were already fixed.
+
 Preview the production build.
 
 ```bash
@@ -352,7 +356,11 @@ extracted-design/
 └── EXTRACTION_REPORT.json  # Metadata, similarity score, and notes
 ```
 
-The exporter normalizes common AI output automatically (e.g. `App.module.css` → `App.css`, `className={styles.foo}` → `className="foo"`, ensures `index.jsx` exists), so the ZIP always builds out of the box.
+The exporter normalizes common AI output automatically so the ZIP always builds out of the box:
+
+- **CSS handling** — `App.module.css` → `App.css`, `className={styles.foo}` → `className="foo"`.
+- **Entry files** — ensures `index.jsx` exists and **always imports `./App.jsx`** (normalizes `./App`, `./app`, `../App`, `App.js`, missing-space variants, or injects the import when absent), and that `App.jsx`/`App.css` exist — rejecting placeholder projects instead of exporting something broken.
+- **Diagnostics** — if a generated project ever fails the smoke test, the error includes `(found: ...)` showing the actual import lines the AI produced, so failures are self-explanatory.
 
 ---
 
