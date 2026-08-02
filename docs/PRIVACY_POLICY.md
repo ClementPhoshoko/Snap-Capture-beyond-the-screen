@@ -81,4 +81,4 @@ We may update this policy from time to time. The "Last updated" date at the top 
 For questions about this policy or the Extension, contact:
 
 **Clement Phoshoko**
-clement.phoshoko@outlook.com
+support@akovolabs.co.za

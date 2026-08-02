@@ -144,7 +144,7 @@ Optional: large promotional tile 1400×560, small tile 440×280.
 ## 7. Publisher / verification
 
 **Developer / publisher name:** Clement Phoshoko
-**Contact email:** clement.phoshoko@outlook.com
+**Contact email:** support@akovolabs.co.za
 **Verification:** Complete email (and later domain) verification in the dashboard.
 
 ---
