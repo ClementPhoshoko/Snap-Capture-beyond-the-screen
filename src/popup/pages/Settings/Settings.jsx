@@ -292,7 +292,7 @@ export default function Settings({ onBack, onClose, theme, accent, onThemeChange
                     {keyStatus === "saved" ? <Check size={14} /> : "Save"}
                   </motion.button>
                 </div>
-                <span className={styles.aiDesc}>Your Google AI Studio API key for design extraction</span>
+                <span className={styles.aiDesc}>Stored locally on this device and used only to contact Google's Gemini API for design extraction.</span>
                 {keyStatus === "saved" && (
                   <div className={styles.statusMsg}>
                     <Check size={12} /> Key saved successfully

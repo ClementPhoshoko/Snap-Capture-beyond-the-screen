@@ -1,9 +1,11 @@
 import { DEFAULT_SETTINGS, AI_DEFAULT_SETTINGS } from "./constants.js";
+import { deleteDesignExtractArchives } from "./designArchive.js";
 
 const SETTINGS_KEY = "settings";
 const HISTORY_KEY = "captureHistory";
 const AI_CONFIG_KEY = "aiConfig";
 const EXTRACT_STATUS_KEY = "extractDesignStatus";
+const EXTRACT_STALE_MS = 10 * 60 * 1000;
 
 export async function getSettings() {
   const stored = await chrome.storage.local.get(SETTINGS_KEY);
@@ -58,7 +60,11 @@ export async function recordCapture(result) {
     size: result.size,
     capturedAt: result.capturedAt,
   };
-  await chrome.storage.local.set({ [HISTORY_KEY]: [entry, ...entries].slice(0, 50) });
+  const nextEntries = [entry, ...entries].slice(0, 50);
+  const evicted = [entry, ...entries].slice(50);
+  const evictedArchiveIds = evicted.map((e) => e.designExtract?.archiveId).filter(Boolean);
+  await chrome.storage.local.set({ [HISTORY_KEY]: nextEntries });
+  deleteDesignExtractArchives(evictedArchiveIds).catch(() => {});
   return entry;
 }
 
@@ -79,7 +85,11 @@ export async function recordDesignExtract(result, tabMeta = {}, archiveId) {
     capturedAt: designExtract.capturedAt,
     designExtract,
   };
-  await chrome.storage.local.set({ [HISTORY_KEY]: [entry, ...entries].slice(0, 50) });
+  const nextEntries = [entry, ...entries].slice(0, 50);
+  const evicted = [entry, ...entries].slice(50);
+  const evictedArchiveIds = evicted.map((e) => e.designExtract?.archiveId).filter(Boolean);
+  await chrome.storage.local.set({ [HISTORY_KEY]: nextEntries });
+  deleteDesignExtractArchives(evictedArchiveIds).catch(() => {});
   return entry;
 }
 
@@ -96,7 +106,23 @@ export async function saveAIConfig(config) {
 
 export async function getExtractDesignStatus() {
   const stored = await chrome.storage.local.get(EXTRACT_STATUS_KEY);
-  return stored[EXTRACT_STATUS_KEY] || null;
+  const status = stored[EXTRACT_STATUS_KEY] || null;
+  if (status?.state === "running" && status.updatedAt) {
+    const age = Date.now() - new Date(status.updatedAt).getTime();
+    if (Number.isFinite(age) && age > EXTRACT_STALE_MS) {
+      const stale = {
+        state: "error",
+        error: {
+          code: "EXTRACT_STALE",
+          message: "Extraction stopped before finishing. Start a new extraction to try again.",
+        },
+        updatedAt: new Date().toISOString(),
+      };
+      await chrome.storage.local.set({ [EXTRACT_STATUS_KEY]: stale });
+      return stale;
+    }
+  }
+  return status;
 }
 
 export async function saveExtractDesignStatus(status) {

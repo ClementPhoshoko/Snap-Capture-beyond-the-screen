@@ -4,6 +4,7 @@ export async function exportProject(generatedProject, format = "react") {
   const zip = new JSZip();
   const project = sanitizePackageName(generatedProject.projectName || "extracted-design");
   const files = normalizeProjectFiles(generatedProject.files || []);
+  smokeTestProject(files);
 
   if (format === "react") {
     zip.file("package.json", JSON.stringify(buildVitePackage(project), null, 2));
@@ -166,6 +167,25 @@ function normalizeAppImports(content) {
     .replace(/className=\{`([^`]*?)\$\{styles\.([A-Za-z0-9_$-]+)\}([^`]*?)`\}/g, 'className="$1$2$3"');
 
   return next;
+}
+
+function smokeTestProject(files) {
+  const map = new Map(files.map((file) => [file.path, file.content]));
+  const app = map.get("App.jsx") || "";
+  const css = map.get("App.css");
+  const index = map.get("index.jsx") || "";
+
+  const failures = [];
+  if (!app.trim()) failures.push("App.jsx is empty");
+  if (!/import\s+["']\.\/App\.css["'];?/.test(app)) failures.push('App.jsx must import "./App.css"');
+  if (/\bstyles\./.test(app)) failures.push("App.jsx still contains CSS module styles.* references");
+  if (css == null) failures.push("App.css is missing");
+  if (!/from\s+["']\.\/App\.jsx["']/.test(index)) failures.push('index.jsx must import "./App.jsx"');
+  if (!/createRoot\s*\(/.test(index)) failures.push("index.jsx must mount the React app");
+
+  if (failures.length) {
+    throw new Error(`Generated project failed packaging checks: ${failures.join("; ")}`);
+  }
 }
 
 function getFileContent(file) {

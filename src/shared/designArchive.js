@@ -45,3 +45,20 @@ export function getDesignExtractArchive(id) {
 export function deleteDesignExtractArchive(id) {
   return withStore("readwrite", (store) => store.delete(id));
 }
+
+export function deleteDesignExtractArchives(ids = []) {
+  if (!ids.length) return Promise.resolve();
+  return openArchiveDB().then((db) => new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    for (const id of ids) store.delete(id);
+    tx.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+    tx.onerror = () => {
+      db.close();
+      reject(tx.error);
+    };
+  }));
+}

@@ -181,7 +181,8 @@ async function cascadeRequest(modelBodyFn, signal) {
       if (result && result._modelNotFound) {
         errors.push(`${model} (generateContent): ${result.message}`);
       } else {
-        return result;
+        const value = await modelBodyFn.validate?.(result, model, "generateContent");
+        return value ?? result;
       }
     } catch (gcErr) {
       if (gcErr?.name === "AbortError") throw gcErr;
@@ -194,7 +195,8 @@ async function cascadeRequest(modelBodyFn, signal) {
       if (result && result._modelNotFound) {
         errors.push(`${model} (interactions): ${result.message}`);
       } else {
-        return result;
+        const value = await modelBodyFn.validate?.(result, model, "interactions");
+        return value ?? result;
       }
     } catch (err) {
       if (err?.name === "AbortError") throw err;
@@ -393,21 +395,20 @@ Output JSON:
     parts.push({ inlineData: img });
   }
 
-  const data = await cascadeRequest(
-    (model) => ({
+  const buildRequest = (model) => ({
       input: { parts },
       config: {
         system_instruction: systemInstruction,
         generation_config: { max_output_tokens: 32768, responseMimeType: "application/json" },
       },
-    }),
-    signal,
-  );
+  });
+  buildRequest.validate = (data) => {
+    const text = extractResponseText(data);
+    if (!text) throw new Error("Gemini returned an empty response");
+    return validateProject(parseProjectJson(text));
+  };
 
-  const text = extractResponseText(data);
-  if (!text) throw new Error("Gemini returned an empty response");
-
-  return validateProject(parseProjectJson(text));
+  return cascadeRequest(buildRequest, signal);
 }
 
 export async function fixDiscrepancies(originalPayload, generatedProject, diffReport, onProgress, signal) {
