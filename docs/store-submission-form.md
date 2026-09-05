@@ -151,6 +151,24 @@ Optional: large promotional tile 1400×560, small tile 440×280.
 
 ## 8. Edge Add-ons (Microsoft) extra notes
 
-- Same text, same screenshots, same ZIP (`release/Snap-v1.2.0.zip`).
+- Same text, same screenshots, same ZIP (`release/Snap-v1.2.1.zip`).
 - Edge requires the same privacy policy URL and its own data-usage declaration.
 - Verify your publisher identity in the Microsoft Partner Center.
+
+---
+
+## 9. Upload package — v1.2.1
+
+**Package file:** `release/Snap-v1.2.1.zip` (contents of `dist/`)
+
+**What's new in 1.2.1 — paste into the CWS "Version Description / What's new" field:**
+
+> **Fixed:**
+> - "The extension gallery cannot be scripted" error when opening the popup on the Chrome Web Store, Google Accounts, or other Google-protected pages. Capture and Extract Design now show a friendly, accurate message instead of the raw Chrome error.
+> - Protected Google domains (Chrome Web Store, Accounts, My Account, Clients) are explicitly blocked before any scripting attempt, for a clearer UX and fewer review-surface errors.
+> - Any future scripting-permission error from Chrome is now caught and mapped to a user-facing message.
+>
+> **Improved:**
+> - Popup height consistency when switching between Home, Settings, and History pages. Settings & History now use a constrained viewport height so the popup doesn't collapse to its content height on Chrome's popup window.
+> - Differentiated error messages for unsupported pages: non-http(s) pages get the existing hint, while https pages on Chrome-protected hosts get a specific "protected by Chrome" note.
+>

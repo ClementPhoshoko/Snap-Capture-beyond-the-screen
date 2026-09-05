@@ -25,8 +25,30 @@ async function getActiveTab() {
   return tab || null;
 }
 
+const PROTECTED_HOSTS = [
+  "chrome.google.com",
+  "chromewebstore.google.com",
+  "clients.google.com",
+  "accounts.google.com",
+  "myaccount.google.com",
+];
+
+function isProtectedHost(url) {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    for (const protectedHost of PROTECTED_HOSTS) {
+      if (host === protectedHost || host.endsWith("." + protectedHost)) return true;
+    }
+  } catch {
+  }
+  return false;
+}
+
 function isInjectable(tab) {
-  return Boolean(tab?.id && tab.url && /^(https?|file):/i.test(tab.url));
+  if (!tab?.id || !tab?.url) return false;
+  if (!/^(https?|file):/i.test(tab.url)) return false;
+  if (isProtectedHost(tab.url)) return false;
+  return true;
 }
 
 async function ensureContentScript(tabId) {
@@ -35,7 +57,15 @@ async function ensureContentScript(tabId) {
     if (response?.ready) return;
   } catch {
   }
-  await chrome.scripting.executeScript({ target: { tabId }, files: [CONTENT_SCRIPT] });
+  try {
+    await chrome.scripting.executeScript({ target: { tabId }, files: [CONTENT_SCRIPT] });
+  } catch (err) {
+    const msg = (err?.message || "").toLowerCase();
+    if (msg.includes("cannot be scripted") || msg.includes("gallery") || msg.includes("access to") || msg.includes("not allowed")) {
+      throw new Error("This page is protected by Chrome and cannot be captured. Open a regular http(s) webpage and try again.");
+    }
+    throw new Error("Capture could not start on this page. Open a regular http(s) webpage and try again.");
+  }
   const response = await chrome.tabs.sendMessage(tabId, { type: MessageType.PING, payload: {} });
   if (!response?.ready) throw new Error("Capture controller did not initialize");
 }
@@ -78,6 +108,12 @@ function getDomain(url) {
 async function handleStartCapture(payload) {
   const tab = await getActiveTab();
   if (!tab) throw new Error("No active tab found");
+  if (!tab?.url || !/^(https?|file):/i.test(tab.url)) {
+    throw new Error("This page cannot be captured as a full page. Open a regular http(s) webpage and try again.");
+  }
+  if (isProtectedHost(tab.url)) {
+    throw new Error("This page is protected by Chrome and cannot be captured. Open a regular http(s) webpage and try again.");
+  }
   if (!isInjectable(tab)) {
     throw new Error("This page cannot be captured as a full page. Open a regular http(s) webpage and try again.");
   }
@@ -198,6 +234,12 @@ async function handleExtractDesign() {
 async function runExtractDesign(signal) {
   const tab = await getActiveTab();
   if (!tab) throw new Error("No active tab found");
+  if (!tab?.url || !/^(https?|file):/i.test(tab.url)) {
+    throw new Error("Extraction requires an http(s) webpage. Open a regular page and try again.");
+  }
+  if (isProtectedHost(tab.url)) {
+    throw new Error("This page is protected by Chrome and cannot be extracted. Open a regular http(s) webpage and try again.");
+  }
   if (!isInjectable(tab)) {
     throw new Error("Extraction requires an http(s) webpage. Open a regular page and try again.");
   }
