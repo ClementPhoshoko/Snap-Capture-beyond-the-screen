@@ -7,7 +7,7 @@
 }
 
 .constrained {
-  height: 100dvh;
+  height: var(--popup-min-height);
   overflow: hidden;
 }
 
